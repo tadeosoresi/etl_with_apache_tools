@@ -1,0 +1,10 @@
+# Folders
+airflow_env/
+airflow/logs/
+airflow/plugins/
+
+# Extensions
+*.log
+
+# Files
+airflow.cfg
