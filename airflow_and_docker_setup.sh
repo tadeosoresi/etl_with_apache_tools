@@ -3,18 +3,14 @@
 # to run: sudo sh airflow_and_docker_setup.sh
 # important: developed in ubuntu 22.04, must execute in super user mood
 
+# Verificar si el script se está ejecutando como root
+if [ "$EUID" -ne 0 ]
+  then echo "Script must be execute in super user (sudo) mood"
+  exit
+fi
+
 # Corta la ejecucion al primer error
 set -e
-
-# Verificar si el script se está ejecutando como root
-
-if [ "$EUID" -ne 0 ]; then
-
-    echo "Script must be execute in super user (sudo) mood"
-
-    exit 1
-
-fi
 
 setup_ubuntu() {
     echo '\nUpdating system, installing Python\n'
