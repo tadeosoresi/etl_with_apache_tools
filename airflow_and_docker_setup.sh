@@ -4,7 +4,7 @@
 # important: developed in ubuntu 22.04, must execute in super user mood
 
 # Verificar si el script se está ejecutando como root
-if [[ "$EUID" -ne 0 ]]
+if [ "$EUID" -ne 0 ]
   then echo "Script must be execute in super user (sudo) mood"
   exit
 fi
@@ -31,7 +31,7 @@ up_local_airflow() {
     . airflow_env/bin/activate && pip3 install --upgrade pip && \
     pip3 install 'apache-airflow[amazon]==2.4.2' \
     --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.4.2/constraints-3.8.txt" && \
-    pip3 install -r requirements.txt && airflow db init && airflow users create --username ${AIRFLOW_USER} --password ${AIRFLOW_PASSWORD} --firstname ${AIRFLOW_FIRSTNAME} --lastname ${AIRFLOW_LASTNAME} --role Admin --email ${AIRFLOW_EMAIL}
+    pip3 install -r requirements.txt && airflow db init && airflow users create -u $AIRFLOW_USER -p $AIRFLOW_PASSWORD -f $AIRFLOW_FIRSTNAME -l $AIRFLOW_LASTNAME -r Admin -e $AIRFLOW_EMAIL
     }
 
 setup_ubuntu
