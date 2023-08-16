@@ -24,3 +24,15 @@ with DAG(
         poke_interval=5,
         timeout=30
     )
+    task2 = MongoToS3Operator(
+        mongo_conn_id='',
+        aws_conn_id='',
+        mongo_collection='',
+        mongo_query='',
+        s3_bucket='',
+        s3_key='',
+        mongo_db='',
+        replace='',
+        allow_disk_use=True,
+        compression='gzip'
+    )
