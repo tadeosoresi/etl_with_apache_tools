@@ -1,27 +1,37 @@
 #!/bin/bash
 
-# to run: sh airflow_and_docker_setup.sh
-# important: developed in ubuntu 22.04
+# to run: sudo sh airflow_and_docker_setup.sh
+# important: developed in ubuntu 22.04, must execute in super user mood
 
 # Corta la ejecucion al primer error
 set -e
 
+# Verificar si el script se está ejecutando como root
+
+if [ "$EUID" -ne 0 ]; then
+
+    echo "Script must be execute in super user (sudo) mood"
+
+    exit 1
+
+fi
+
 setup_ubuntu() {
-    echo 'Updating system, installing Python\n'
+    echo '\nUpdating system, installing Python\n'
     apt-get update && apt-get install -y python3 python3-pip python3-dev python3-venv && apt-get -y install net-tools
     }
 
 up_compose_services() {
-    echo 'Launching docker services\n'
+    echo '\nLaunching docker services\n'
     docker compose up -d
     }
 
 up_local_airflow() {
 
-    echo 'Creating virtual environment\n'
+    echo '\nCreating virtual environment\n'
     python3 -m venv airflow_env
 
-    echo 'Installing Airflow, setting up Airflow user\n'
+    echo '\nInstalling Airflow, setting up Airflow user\n'
     python3 . airflow_env/bin/activate && pip3 install --upgrade pip && \
     pip3 install 'apache-airflow[amazon]==2.4.2' \
     --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.4.2/constraints-3.8.txt" && \
