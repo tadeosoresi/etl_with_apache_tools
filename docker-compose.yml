@@ -6,8 +6,8 @@ services:
     container_name: namenode
     restart: always
     ports:
-      - 127.0.0.1:50070:9870
-      - 127.0.0.1:50075:9000
+      - 127.0.0.1:9870:9870
+      - 127.0.0.1:9010:9000
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
       - hadoop_datasets:/home
@@ -18,7 +18,7 @@ services:
       - ./cluster_config_files/hadoop.env
     networks:
       etl_network:
-        ipv4_address: 172.103.0.1
+        ipv4_address: 172.103.0.17
 
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -197,7 +197,7 @@ services:
   
   postgres:
     image: postgres
-    container_name: airflow_postgres
+    container_name: etl_postgres
     restart: always
     environment:
       - POSTGRES_USER='${POSTGRES_USER}'
