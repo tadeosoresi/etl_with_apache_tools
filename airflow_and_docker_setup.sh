@@ -34,6 +34,6 @@ up_local_airflow() {
                                                                         --email ${AIRFLOW_EMAIL}
     }
 
-up_etl_environment
+setup_ubuntu
 up_compose_services
-up_airflow
+up_local_airflow
