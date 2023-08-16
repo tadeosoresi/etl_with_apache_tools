@@ -9,8 +9,8 @@ export AIRFLOW_USER=etlDataEngineer
 export AIRFLOW_PASSWORD=etlPassword
 export AIRFLOW_EMAIL=example@gmail.com
 export POSTGRES_USER=etlDataEngineer
-export POSTGRES_PASSWORD=etlPassword
-export POSTGRES_DB=local_airflow_db
+export POSTGRES_PASSWORD=etl1234
+export POSTGRES_DB=etl_database
 export SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5444/${POSTGRES_DB}
 
 # to run: source environment_variables.sh
