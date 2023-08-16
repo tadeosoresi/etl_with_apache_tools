@@ -6,8 +6,8 @@ services:
     container_name: namenode
     restart: always
     ports:
-      - 127.0.0.1:9870:9870
-      - 127.0.0.1:9010:9000
+      - 127.0.0.1:50070:9870
+      - 127.0.0.1:50075:9000
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
       - hadoop_datasets:/home
