@@ -151,7 +151,7 @@ services:
         ipv4_address: 172.103.0.8
       
   mongodb:
-    container_name: mongodb
+    container_name: mongodb_etl
     ports:
       - 127.0.0.1:27018:27017
     image: mongo:latest
