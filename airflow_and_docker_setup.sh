@@ -28,7 +28,7 @@ up_local_airflow() {
     python3 -m venv airflow_env
 
     echo '\nInstalling Airflow, setting up Airflow user\n'
-    source airflow_env/bin/activate && pip3 install --upgrade pip && \
+    . airflow_env/bin/activate && pip3 install --upgrade pip && \
     pip3 install 'apache-airflow[amazon]==2.4.2' \
     --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.4.2/constraints-3.8.txt" && \
     pip3 install -r requirements.txt && airflow db init && airflow users create \
