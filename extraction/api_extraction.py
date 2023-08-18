@@ -1,6 +1,6 @@
 import os
 from typing import Union
-from typing import iterator
+from typing import Iterator
 import json
 import requests
 
