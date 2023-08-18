@@ -1,9 +1,16 @@
 import pendulum
 from datetime import datetime, timedelta
 from airflow import DAG
+from airflow.operators.python import PythonOperator
 from airflow.providers.http.sensors.http import HttpSensor
 from airflow.providers.amazon.aws.sensors.s3_key import S3KeySensor
 from airflow.providers.amazon.aws.transfers.mongo_to_s3 import MongoToS3Operator
+try:
+    from extraction.api_extraction import TMDBApiData
+except ModuleNotFoundError:
+    path = os.path.abspath('.')
+    sys.path.insert(1, path)
+from extraction.api_extraction import TMDBApiData
 
 default_args = {
                     'owner': 'etl_data_engineer',
@@ -15,7 +22,14 @@ with DAG(
     start_date=pendulum.yesterday(),
     schedule_interval='@daily'
 ) as dag:
-    task1 = S3KeySensor(
+
+    task1 = PythonOperator(
+        task_id='tmdb_api_data',
+        python_callable=TMDBApiData.get_data,
+        dag=dag
+    )
+    task1
+    """task1 = S3KeySensor(
         task_id='data_to_minio',
         bucket_name='',
         bucket_key='',
@@ -35,4 +49,4 @@ with DAG(
         replace='',
         allow_disk_use=True,
         compression='gzip'
-    )
+    )"""
