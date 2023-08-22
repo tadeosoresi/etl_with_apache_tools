@@ -25,6 +25,7 @@ def get_and_insert_data(mongo_conn_id, db, collection):
     print(f"Connected to MongoDB - {client.server_info()}")    
     movies = TMDBApiData.get_data()
     for movie in movies:
+        print(movie)
         currency_collection.insert_one(movie)
 
     
