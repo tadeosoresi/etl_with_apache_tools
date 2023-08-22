@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Union
 from typing import Iterator
 import json
@@ -29,7 +30,9 @@ class TMDBApiData():
             for content in results:
                 content_id = content['id']
                 content['cast'] = cls.get_cast(content_id)
+                content['created_at'] = time.strftime("%Y-%m-%d")
                 yield content
+        print('\n\x1b[1;33;40mAPI Scraping Done!\x1b[0m\n')
     
     @classmethod
     def get_cast(cls, content_id:int) -> Union[None, dict]:
