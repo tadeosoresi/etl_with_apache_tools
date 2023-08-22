@@ -31,12 +31,7 @@ up_local_airflow() {
     . airflow_env/bin/activate && pip3 install --upgrade pip && \
     pip3 install 'apache-airflow[amazon]==2.4.2' \
     --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.4.2/constraints-3.8.txt" && \
-    pip3 install -r requirements.txt && airflow db init && airflow users create \
-                                                                    --username admin \
-                                                                    --firstname FIRST_NAME \
-                                                                    --lastname LAST_NAME \
-                                                                    --role Admin \
-                                                                    --email admin@example.org
+    pip3 install -r requirements.txt
     }
 
 setup_ubuntu
