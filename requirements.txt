@@ -2,8 +2,8 @@ apache-airflow-providers-common-sql
 apache-airflow-providers-postgres
 apache-airflow-providers-amazon
 apache-airflow-providers-docker
-apache-airflow-providers-mongo
 pymongo
+apache-airflow-providers-mongo
 pandas
 numpy
 phpserialize
@@ -12,4 +12,3 @@ sshtunnel
 sharepy==1.3.0
 openpyxl
 kubernetes
-bson
