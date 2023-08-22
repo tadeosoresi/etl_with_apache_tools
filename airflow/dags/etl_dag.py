@@ -18,7 +18,7 @@ from extraction.api_extraction import TMDBApiData
 def get_and_insert_data(mongo_conn_id, db, collection):
     """
     """
-    hook = MongoHook(mongo_conn_id='mongoid')
+    hook = MongoHook(mongo_conn_id='etl_mongo_conn')
     client = hook.get_conn()
     db = client[db]
     collection = db[collection]
