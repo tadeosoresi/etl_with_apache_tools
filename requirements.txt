@@ -2,6 +2,7 @@ apache-airflow-providers-common-sql
 apache-airflow-providers-postgres
 apache-airflow-providers-amazon
 apache-airflow-providers-docker
+apache-airflow-providers-mongo
 pymongo
 pandas
 numpy
