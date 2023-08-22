@@ -4,6 +4,7 @@ import pendulum
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.providers.http.sensors.http import HttpSensor
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
 from airflow.providers.amazon.aws.transfers.mongo_to_s3 import MongoToS3Operator
@@ -14,20 +15,38 @@ except ModuleNotFoundError:
     sys.path.insert(1, path)
 from extraction.api_extraction import TMDBApiData
 
+def get_and_insert_data(mongo_conn_id, db, collection):
+    """
+    """
+    hook = MongoHook(mongo_conn_id='mongoid')
+    client = hook.get_conn()
+    db = client[db]
+    collection = db[collection]
+    print(f"Connected to MongoDB - {client.server_info()}")    
+    movies = TMDBApiData.get_data()
+    for movie in movies:
+        currency_collection.insert_one(movie)
+
+    
 default_args = {
                     'owner': 'etl_data_engineer',
                     'reties': 10,
                     'retry_delay': timedelta(minutes=2)
                 }
 with DAG(
-    dag_id='etl_dag_v1',
-    start_date=pendulum.yesterday(),
-    schedule_interval='@daily'
+        dag_id='etl_dag_v1',
+        start_date=pendulum.yesterday(),
+        schedule_interval='@daily'
 ) as dag:
 
     task1 = PythonOperator(
-        task_id='tmdb_api_data',
-        python_callable=TMDBApiData.get_data,
+        task_id='tmdb_api_to_local_mongo',
+        python_callable=get_and_insert_data,
+        op_kwargs={ # Las keys deben coincidir con los parametros de la funcion!! incluso en nombre
+            'mongo_conn_id': '',
+            'db': 'tmdb_api',
+            'collection': 'movies'
+        },
         dag=dag
     )
     task1
