@@ -165,8 +165,8 @@ services:
       - 127.0.0.1:27018:27017
     image: mongo:latest
     environment:
-      - MONGODB_USER="user"
-      - MONGODB_PASS="pass"
+      - MONGODB_USER=${MONGO_USER}
+      - MONGODB_PASS=${MONGO_PASSWORD}
     volumes:
       - "mongodb-data:/data/db"
     networks:
