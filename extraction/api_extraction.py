@@ -24,7 +24,7 @@ class TMDBApiData():
         """
         page = 1
         while True:
-            print(f'page {page}')
+            print(f'Scraping page {page} of TMDB API')
             url = cls.movies_endpoint.format(page)
             response = requests.get(url, headers=cls.headers)
             response = response.json()
@@ -36,6 +36,7 @@ class TMDBApiData():
                 content['cast'] = cls.get_cast(content_id)
                 content['created_at'] = cls.date_of_scraping
                 yield content
+            page += 1
         print('\n\x1b[1;33;40mAPI Scraping Done!\x1b[0m\n')
     
     @classmethod
