@@ -18,12 +18,12 @@ from extraction.api_extraction import TMDBApiData
 def get_and_insert_data(mongo_conn_id, db, collection):
     """
     """
-    hook = MongoHook(mongo_conn_id='mongo_etl_id')
+    hook = MongoHook(conn_id='mongo_etl_id')
     client = hook.get_conn()
     db = client[db]
     collection = db[collection]
     print(f"Connected to MongoDB - {client.server_info()}")
-    data_scraped = collection.find({}, find_one=False, projection={'_id': 0, 'id': 1})
+    data_scraped = collection.find({})
     print(list(data_scraped))
     """movies = TMDBApiData.get_data()
     for movie in movies:
