@@ -181,7 +181,7 @@ services:
     networks:
       etl_network:
         ipv4_address: 172.103.0.12
-        
+
   neo4j:
     container_name: neo4j
     image: neo4j:latest
@@ -249,7 +249,7 @@ volumes:
   hadoop_datanode:
   hadoop_historyserver:
   hive_scripts:
-  mongodb-data:
+  mongo_data:
   postgres_data:
 
 networks:
