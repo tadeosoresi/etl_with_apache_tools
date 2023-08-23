@@ -18,7 +18,7 @@ from extraction.api_extraction import TMDBApiData
 def get_and_insert_data(mongo_conn_id, db, collection):
     """
     """
-    hook = MongoHook(mongo_conn_id='etl_mongo_conn')
+    hook = MongoHook(mongo_conn_id='mongo_etl_id')
     client = hook.get_conn()
     db = client[db]
     collection = db[collection]
@@ -26,7 +26,7 @@ def get_and_insert_data(mongo_conn_id, db, collection):
     movies = TMDBApiData.get_data()
     for movie in movies:
         print(movie)
-        currency_collection.insert_one(movie)
+        collection.insert_one(movie)
 
     
 default_args = {
