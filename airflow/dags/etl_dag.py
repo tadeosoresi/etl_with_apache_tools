@@ -24,11 +24,11 @@ def get_and_insert_data(mongo_conn_id, db, collection):
     collection = db[collection]
     print(f"Connected to MongoDB - {client.server_info()}")
     data_scraped = collection.find({}, {'_id': 0, 'id':1})
-    print(list(data_scraped))
-    """movies = TMDBApiData.get_data()
+    movies = TMDBApiData.get_data()
     for movie in movies:
+        if any(_dict['id'] == movie['id'] for _dict in data_scraped): continue
         collection.insert_one(movie)
-    hook.close_conn()"""
+    hook.close_conn()
  
 default_args = {
                     'owner': 'etl_data_engineer',
