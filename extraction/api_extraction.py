@@ -4,6 +4,7 @@ from typing import Union
 from typing import Iterator
 import json
 import requests
+from airflow.providers.mongo.hooks.mongo import MongoHook
 
 class TMDBApiData():
     """
@@ -14,6 +15,8 @@ class TMDBApiData():
             "accept": "application/json",
             "Authorization": "Bearer " + os.environ['TMDB_API_TOKEN']
         }
+    content_ids = []
+    date_of_scraping = time.strftime("%Y-%m-%d")
 
     @classmethod
     def get_data(cls) -> Iterator:
@@ -29,8 +32,9 @@ class TMDBApiData():
             results = response.get('results')
             for content in results:
                 content_id = content['id']
+                if content_id in cls.content_ids: continue
                 content['cast'] = cls.get_cast(content_id)
-                content['created_at'] = time.strftime("%Y-%m-%d")
+                content['created_at'] = cls.date_of_scraping
                 yield content
         print('\n\x1b[1;33;40mAPI Scraping Done!\x1b[0m\n')
     
