@@ -163,9 +163,6 @@ services:
     container_name: mongodb_etl
     restart: always
     image: 'mongo:4.4.6'
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - ./mongo_data:/data/db
     ports:
