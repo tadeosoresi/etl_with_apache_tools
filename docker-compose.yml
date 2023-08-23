@@ -158,21 +158,30 @@ services:
     networks:
       etl_network:
         ipv4_address: 172.103.0.11
-      
+  
   mongodb:
     container_name: mongodb_etl
-    ports:
-      - 127.0.0.1:27018:27017
-    image: mongo:latest
+    restart: always
+    image: 'mongo:4.4.6'
     environment:
       - MONGODB_USER=${MONGO_USER}
       - MONGODB_PASS=${MONGO_PASSWORD}
     volumes:
-      - "mongodb-data:/data/db"
+      - ./mongo_data:/data/db
+    ports:
+      - 127.0.0.1:27018:27017
+    expose:
+      - 27017
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
     networks:
       etl_network:
         ipv4_address: 172.103.0.12
-
+        
   neo4j:
     container_name: neo4j
     image: neo4j:latest
