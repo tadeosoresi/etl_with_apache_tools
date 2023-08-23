@@ -23,7 +23,7 @@ def get_and_insert_data(mongo_conn_id, db, collection):
     db = client[db]
     collection = db[collection]
     print(f"Connected to MongoDB - {client.server_info()}")
-    data_scraped = collection.find({})
+    data_scraped = collection.find({}, {'_id': 0, 'id':1})
     print(list(data_scraped))
     """movies = TMDBApiData.get_data()
     for movie in movies:
