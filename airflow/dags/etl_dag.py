@@ -22,13 +22,14 @@ def get_and_insert_data(mongo_conn_id, db, collection):
     client = hook.get_conn()
     db = client[db]
     collection = db[collection]
-    print(f"Connected to MongoDB - {client.server_info()}")    
-    movies = TMDBApiData.get_data()
+    print(f"Connected to MongoDB - {client.server_info()}")
+    data_scraped = client.find(collection, {}, find_one=False, mongo_db=db, projection={'_id': 0, 'id': 1})
+    print(list(data_scraped))
+    """movies = TMDBApiData.get_data()
     for movie in movies:
-        print(movie)
         collection.insert_one(movie)
-
-    
+    hook.close_conn()"""
+ 
 default_args = {
                     'owner': 'etl_data_engineer',
                     'reties': 10,
