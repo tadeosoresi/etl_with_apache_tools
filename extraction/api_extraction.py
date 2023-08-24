@@ -55,7 +55,7 @@ class TMDBApiData():
         return response
     
     @staticmethod
-    def get_response(cls, url:str, headers:dict) -> dict:
+    def get_response(url:str, headers:dict) -> dict:
         """
         Metodo que hace requests y parsea a JSON.
         Returns: JSON object
