@@ -16,7 +16,7 @@ class TMDBApiData():
             "Authorization": "Bearer " + os.environ['TMDB_API_TOKEN']
         }
     content_ids = []
-    date_of_scraping = time.strftime("%Y-%m-%d")
+    date_of_scraping = None
 
     @classmethod
     def get_data(cls) -> Iterator:
@@ -26,9 +26,8 @@ class TMDBApiData():
         while True:
             print(f'Scraping page {page} of TMDB API')
             url = cls.movies_endpoint.format(page)
-            response = requests.get(url, headers=cls.headers)
-            response = response.json()
-            if response.get('success', None) == False: break
+            response = cls.get_response(url, cls.headers)
+            if response.get('success', None) == False or page == 50: break
             results = response.get('results')
             for content in results:
                 content_id = content['id']
@@ -44,8 +43,7 @@ class TMDBApiData():
         """
         """
         url = cls.cast_endpoint.format(content_id)
-        response = requests.get(url, headers=cls.headers)
-        response = response.json()
+        response = cls.get_response(url, cls.headers)
         cast = response.get('cast')
         if not cast: return None
         keys_to_keep = ['known_for_department',
@@ -55,5 +53,27 @@ class TMDBApiData():
         response['cast'] = [{key: value for key, value in _dict.items() if key in keys_to_keep} for _dict in cast]
         del response['id']
         return response
+    
+    @staticmethod
+    def get_response(cls, url:str, headers:dict) -> dict:
+        """
+        Metodo que hace requests y parsea a JSON.
+        Returns: JSON object
+        """
+        seconds = 10
+        tries = 0
+        # Errores aleatorios
+        while True:
+            try:
+                response = requests.get(url, headers=headers)
+                return response.json()
+            except (requests.exceptions.ConnectionError, 
+                    requests.exceptions.ChunkedEncodingError,
+                    ConnectionError) as e:
+                assert tries < 10, f'10 tries reached with url -> {url}, exception -> {e}'
+                time.sleep(seconds)
+                seconds += 5
+                tries += 1
+                continue
 
 
