@@ -82,7 +82,7 @@ with DAG(
         compression='gzip',
         dag=dag
     )
-    task1
+    task1 >> task2 >> task3
     """task1 = S3KeySensor(
         task_id='data_to_minio',
         bucket_name='',
