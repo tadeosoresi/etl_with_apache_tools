@@ -69,7 +69,7 @@ with DAG(
         trigger_rule=TriggerRule.ALL_DONE,
         dag=dag
     )
-    task2 = MongoToS3Operator(
+    task3 = MongoToS3Operator(
         task_id="mongo_to_s3",
         mongo_conn_id='mongo_etl_id',
         aws_conn_id='aws_etl_id',
