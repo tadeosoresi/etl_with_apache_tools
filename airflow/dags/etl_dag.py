@@ -59,6 +59,7 @@ with DAG(
         dag=dag
     )
     task2 = MongoSensor(
+        task_id='mongo_tmdb_data_sensor',
         collection='movies',
         query={'created_at': date_of_execution},
         mongo_conn_id='mongo_etl_id',
@@ -66,10 +67,10 @@ with DAG(
         poke_interval=20,
         timeout=480, 
         trigger_rule=TriggerRule.ALL_DONE,
-        task_id="mongo_tmdb_data_sensor",
         dag=dag
     )
     task2 = MongoToS3Operator(
+        task_id="mongo_to_s3",
         mongo_conn_id='mongo_etl_id',
         aws_conn_id='aws_etl_id',
         mongo_collection='movies',
