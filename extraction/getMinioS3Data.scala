@@ -26,8 +26,4 @@ val durationMilliSeconds = (endTimeMillis - startTimeMillis)
 print("Tiempo de Ejecucion:", durationMilliSeconds)
      
 spark.stop()
-"""
-df.write.option("compression", "snappy").mode("overwrite").parquet(
-                "hdfs://172.100.0.5:8020/user/bbdataengineer/bbdata/%s/latest.parquet".format(lower_dir))
-"""
 System.exit(0)
