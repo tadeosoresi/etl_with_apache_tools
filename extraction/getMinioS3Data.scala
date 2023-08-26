@@ -3,7 +3,7 @@ import org.apache.spark.sql.SparkSession
 val s3MinioAccessKey = System.getenv("MINIO_ROOT_USER")
 val s3MinioSecretKey = System.getenv("MINIO_ROOT_PASSWORD")
 print(s3MinioAccessKey, s3MinioSecretKey)
-val s3MinioEndpoint = "172.103.0.16:9000"
+val s3MinioEndpoint = "http://172.103.0.16:9000"
 
 val spark = SparkSession.builder().appName("S3MinioData").getOrCreate()
 spark.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", s3MinioEndpoint)
@@ -12,7 +12,7 @@ spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", s3MinioSecretKey
 spark.sparkContext.hadoopConfiguration.set("spark.sql.debug.maxToStringFields", "100")
 spark.sparkContext.hadoopConfiguration.set("fs.s3a.path.style.access", "true")
 spark.sparkContext.hadoopConfiguration.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-spark.sparkContext.hadoopConfiguration.set("fs.s3a.connection.ssl.enabled", "true")
+spark.sparkContext.hadoopConfiguration.set("fs.s3a.connection.ssl.enabled", "false")
 
 // Loading csv from Minio to DataFrame:
 val sqlContext = new org.apache.spark.sql.SQLContext(sc)
