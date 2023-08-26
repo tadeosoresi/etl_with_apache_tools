@@ -1,8 +1,7 @@
 import org.apache.spark.sql.SparkSession
-System.setProperty(SDKGlobalConfiguration.DISABLE_CERT_CHECKING_SYSTEM_PROPERTY, "true")
 
-val s3MinioAccessKey = sys.env.get("MINIO_ROOT_USER")
-val s3MinioSecretKey = sys.env.get("MINIO_ROOT_PASSWORD")
+val s3MinioAccessKey: String = sys.env.get("MINIO_ROOT_USER")
+val s3MinioSecretKey: String = sys.env.get("MINIO_ROOT_PASSWORD")
 val s3MinioEndpoint: String = "172.103.0.16:9000"
 
 val spark = SparkSession.builder().appName("S3MinioData").getOrCreate()
