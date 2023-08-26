@@ -16,7 +16,6 @@ class TMDBApiData():
             "Authorization": "Bearer " + os.environ['TMDB_API_TOKEN']
         }
     content_ids = []
-    date_of_scraping = None
 
     @classmethod
     def get_data(cls) -> Iterator:
@@ -33,7 +32,6 @@ class TMDBApiData():
                 content_id = content['id']
                 if content_id in cls.content_ids: continue
                 content['cast'] = cls.get_cast(content_id)
-                content['created_at'] = cls.date_of_scraping
                 yield content
             page += 1
         print('\n\x1b[1;33;40mAPI Scraping Done!\x1b[0m\n')
