@@ -37,6 +37,7 @@ def get_and_insert_data(mongo_conn_id, db, collection):
     for movie in movies:
         if any(_dict['id'] == movie['id'] for _dict in data_scraped): continue
         collection.insert_one(movie)
+        print('Insertado contenido CreatedAt:', movie['created_at'])
     hook.close_conn()
 
 def check_bucket(bucket_name, aws_conn_id):
