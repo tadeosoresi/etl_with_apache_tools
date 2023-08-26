@@ -78,6 +78,8 @@ services:
   spark-master:
     image: bde2020/spark-master:3.0.0-hadoop3.2
     container_name: spark-master
+    volumes:
+      - ./extraction/getMinioS3Data.scala:/scalafiles/getMinioS3Data.scala
     depends_on:
       - namenode
       - datanode
@@ -87,6 +89,8 @@ services:
     environment:
       - INIT_DAEMON_STEP=setup_spark
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - MINIO_ROOT_USER=storageDataEngineer
+      - MINIO_ROOT_PASSWORD=storagePassword
     networks:
       etl_network:
         ipv4_address: 172.103.0.6
