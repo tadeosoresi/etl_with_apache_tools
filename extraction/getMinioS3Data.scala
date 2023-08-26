@@ -1,9 +1,9 @@
 import org.apache.spark.sql.SparkSession
 
-val s3MinioAccessKey: Option[String] = sys.env.get("MINIO_ROOT_USER")
-val s3MinioSecretKey: Option[String] = sys.env.get("MINIO_ROOT_PASSWORD")
+val s3MinioAccessKey = System.getenv("MINIO_ROOT_USER")
+val s3MinioSecretKey = System.getenv("MINIO_ROOT_PASSWORD")
 print(s3MinioAccessKey, s3MinioSecretKey)
-val s3MinioEndpoint: String = "172.103.0.16:9000"
+val s3MinioEndpoint = "172.103.0.16:9000"
 
 val spark = SparkSession.builder().appName("S3MinioData").getOrCreate()
 spark.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", s3MinioEndpoint)
