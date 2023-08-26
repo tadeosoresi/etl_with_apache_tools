@@ -117,7 +117,7 @@ with DAG(
     )
     task5 = BashOperator(
         task_id='s3_data_extraction',
-        bash_command='docker exec -it pyspark_container /spark/bin/spark-shell -i /scalafiles/getMinioS3Data.scala',
+        bash_command='docker exec -it spark-master /spark/bin/spark-shell -i /scalafiles/getMinioS3Data.scala',
         dag=dag
     )
 
