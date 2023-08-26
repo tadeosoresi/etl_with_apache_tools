@@ -4,12 +4,14 @@ import time
 import pendulum
 from datetime import datetime, timedelta
 from airflow import DAG
+from airflow.exceptions import AirflowException
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.operators.python import PythonOperator
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.mongo.hooks.mongo import MongoHook
-from airflow.providers.http.sensors.http import HttpSensor
 from airflow.providers.mongo.sensors.mongo import MongoSensor
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
+from airflow.providers.amazon.aws.operators.s3 import S3CreateBucketOperator
 from airflow.providers.amazon.aws.transfers.mongo_to_s3 import MongoToS3Operator
 try:
     from extraction.api_extraction import TMDBApiData
@@ -36,6 +38,14 @@ def get_and_insert_data(mongo_conn_id, db, collection):
         if any(_dict['id'] == movie['id'] for _dict in data_scraped): continue
         collection.insert_one(movie)
     hook.close_conn()
+
+def check_bucket(bucket_name, aws_conn_id):
+    """
+    """
+    s3_hook = S3Hook(aws_conn_id)
+    bucket_exists = s3_hook.check_for_bucket(bucket_name)
+    assert bucket_exists, f'Bucket {bucket_name} not exists! creating...'
+
  
 default_args = {
                     'owner': 'etl_data_engineer',
@@ -48,12 +58,25 @@ with DAG(
         schedule_interval='@daily'
 ) as dag:
 
+    check_bucket = PythonOperator(
+        task_id='check_s3_bucket',
+        python_callable=check_bucket,
+        op_kwargs={'bucket_name': 'movies-datalake', 
+                    'aws_conn_id': 'aws_etl_id'},
+        dag=dag
+    )
+    create_bucket = S3CreateBucketOperator(
+        task_id='create_s3_bucket',
+        bucket_name='movies-datalake',
+        trigger_rule=TriggerRule.ALL_FAILED,
+        dag=dag
+    )
     task1 = PythonOperator(
         task_id='tmdb_api_to_local_mongo',
-        python_callable=get_and_insert_data,
+        python_callcreate_bucketable=get_and_insert_data,
         op_kwargs={ # Las keys deben coincidir con los parametros de la funcion!! incluso en nombre
             'mongo_conn_id': 'mongo_etl_id',
-            'db': 'tmdb_api',
+            'db': 'tmdb_data',
             'collection': 'movies'
         },
         dag=dag
@@ -63,14 +86,13 @@ with DAG(
         collection='movies',
         query={'created_at': date_of_execution},
         mongo_conn_id='mongo_etl_id',
-        mongo_db='tmdb_api',
+        mongo_db='tmdb_data',
         poke_interval=20,
         timeout=480, 
-        trigger_rule=TriggerRule.ALL_DONE,
         dag=dag
     )
     task3 = MongoToS3Operator(
-        task_id="mongo_to_s3",
+        task_id='mongo_to_s3',
         mongo_conn_id='mongo_etl_id',
         aws_conn_id='aws_etl_id',
         mongo_collection='movies',
@@ -78,31 +100,20 @@ with DAG(
         mongo_projection={'_id': 0},
         s3_bucket='movies-datalake',
         s3_key='tmdb_data/',
-        mongo_db='tmdb_api',
+        mongo_db='tmdb_data',
         replace=True,
         allow_disk_use=True,
         compression='gzip',
         dag=dag
     )
-    task1 >> task2 >> task3
-    """task1 = S3KeySensor(
-        task_id='data_to_minio',
-        bucket_name='',
-        bucket_key='',
-        aws_conn_id='',
-        mode='poke',
-        poke_interval=5,
-        timeout=30
+    task4 = S3KeySensor(
+        task_id='s3_sensor',
+        aws_conn_id='aws_etl_id', 
+        bucket_name='movies-datalake',
+        bucket_key='tmdb_data/',
+        poke_interval=20,
+        timeout=480, 
+        dag=dag
     )
-    task2 = MongoToS3Operator(
-        mongo_conn_id='',
-        aws_conn_id='',
-        mongo_collection='',
-        mongo_query='',
-        s3_bucket='',
-        s3_key='',
-        mongo_db='',
-        replace='',
-        allow_disk_use=True,
-        compression='gzip'
-    )"""
+    check_bucket >> create_bucket
+    task1 >> task2 >> task3 >> task4
