@@ -30,15 +30,14 @@ def get_and_insert_data(mongo_conn_id, db, collection):
     db = client[db]
     collection = db[collection]
     print(f"Connected to MongoDB - {client.server_info()}")
-    data_scraped = collection.find({}, {'_id': 0, 'id':1})
+    data_scraped = list(collection.find({}, {'_id': 0, 'id':1}))
     tmdb_class = TMDBApiData()
-    tmdb_class.date_of_scraping = date_of_execution
     movies = tmdb_class.get_data()
     for movie in movies:
         if any(_dict['id'] == movie['id'] for _dict in data_scraped): continue
+        movie['created_at'] = date_of_execution
         collection.insert_one(movie)
         print('Insertado contenido CreatedAt:', movie['created_at'])
-    hook.close_conn()
 
 def check_bucket(bucket_name, aws_conn_id):
     """
@@ -68,13 +67,14 @@ with DAG(
     )
     create_bucket = S3CreateBucketOperator(
         task_id='create_s3_bucket',
+        aws_conn_id='aws_etl_id',
         bucket_name='movies-datalake',
         trigger_rule=TriggerRule.ALL_FAILED,
         dag=dag
     )
     task1 = PythonOperator(
         task_id='tmdb_api_to_local_mongo',
-        python_callcreate_bucketable=get_and_insert_data,
+        python_callable=get_and_insert_data,
         op_kwargs={ # Las keys deben coincidir con los parametros de la funcion!! incluso en nombre
             'mongo_conn_id': 'mongo_etl_id',
             'db': 'tmdb_data',
@@ -100,7 +100,7 @@ with DAG(
         mongo_query={},
         mongo_projection={'_id': 0},
         s3_bucket='movies-datalake',
-        s3_key='tmdb_data/',
+        s3_key='movies.json',
         mongo_db='tmdb_data',
         replace=True,
         allow_disk_use=True,
@@ -111,7 +111,7 @@ with DAG(
         task_id='s3_sensor',
         aws_conn_id='aws_etl_id', 
         bucket_name='movies-datalake',
-        bucket_key='tmdb_data/',
+        bucket_key='movies.json',
         poke_interval=20,
         timeout=480, 
         dag=dag
