@@ -7,6 +7,7 @@ from airflow import DAG
 from airflow.exceptions import AirflowException
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash_operator import BashOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.providers.mongo.sensors.mongo import MongoSensor
@@ -46,7 +47,6 @@ def check_bucket(bucket_name, aws_conn_id):
     bucket_exists = s3_hook.check_for_bucket(bucket_name)
     assert bucket_exists, f'Bucket {bucket_name} not exists! creating...'
 
- 
 default_args = {
                     'owner': 'etl_data_engineer',
                     'reties': 10,
@@ -104,7 +104,6 @@ with DAG(
         mongo_db='tmdb_data',
         replace=True,
         allow_disk_use=True,
-        compression='gzip',
         dag=dag
     )
     task4 = S3KeySensor(
@@ -116,5 +115,11 @@ with DAG(
         timeout=480, 
         dag=dag
     )
+    task5 = BashOperator(
+        task_id='s3_data_extraction',
+        bash_command='docker exec -it pyspark_container /spark/bin/spark-shell -i /scalafiles/getMinioS3Data.scala',
+        dag=dag
+    )
+
     check_bucket >> create_bucket
     task1 >> task2 >> task3 >> task4
