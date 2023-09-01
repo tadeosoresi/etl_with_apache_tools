@@ -20,7 +20,8 @@ val startTimeMillis = System.currentTimeMillis()
 
 val s3MinioBucket: String = "movies-datalake"
 val df = sqlContext.read.json("s3a://%s/movies.json".format(s3MinioBucket))
-df.show()
+df.write.option("compression", "snappy").mode("overwrite").parquet(
+                        "hdfs://172.103.0.17:9000/user/bbdataengineer/bbdata/%s/latest.parquet".format(lower_dir))
 
 val endTimeMillis = System.currentTimeMillis()
 val durationMilliSeconds = (endTimeMillis - startTimeMillis)
