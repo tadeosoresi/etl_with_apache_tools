@@ -2,6 +2,8 @@ apache-airflow-providers-common-sql
 apache-airflow-providers-postgres
 apache-airflow-providers-amazon
 apache-airflow-providers-docker
+hdfs[avro,dataframe]
+apache-airflow-providers-apache-hdfs
 pymongo
 apache-airflow-providers-mongo
 pandas
