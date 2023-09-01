@@ -12,6 +12,7 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.providers.mongo.sensors.mongo import MongoSensor
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
+from airflow.providers.apache.hdfs.sensors.hdfs import HdfsSensor 
 from airflow.providers.amazon.aws.operators.s3 import S3CreateBucketOperator
 from airflow.providers.amazon.aws.transfers.mongo_to_s3 import MongoToS3Operator
 try:
@@ -72,6 +73,22 @@ with DAG(
         trigger_rule=TriggerRule.ALL_FAILED,
         dag=dag
     )
+
+    check_hdfs_dirs = HdfsSensor(
+        filepath='/user/local-datalake/tmdb/movies/',
+        hdfs_conn_id='hdfs_conn_id',
+        ignore_copying=True,
+        poke_interval=5,
+        timeout=30,
+        dag=dag
+    )
+    create_hdfs_dirs = BashOperator(
+            task_id='hadoop_dirs',
+            bash_command='docker exec -it namenode bash "create.sh" || true',
+            trigger_rule=TriggerRule.ALL_FAILED,
+            dag=dag
+        )
+
     task1 = PythonOperator(
         task_id='tmdb_api_to_local_mongo',
         python_callable=get_and_insert_data,
@@ -122,4 +139,5 @@ with DAG(
     )
 
     check_bucket >> create_bucket
-    task1 >> task2 >> task3 >> task4
+    check_hdfs_dirs >> create_hdfs_dirs
+    task1 >> task2 >> task3 >> task4 >> task5
