@@ -40,7 +40,6 @@ def get_and_insert_data(mongo_conn_id, db, collection):
     for movie in movies:
         if any(_dict['id'] == movie['id'] for _dict in data_scraped): continue
         movie['created_at'] = date_of_execution
-        print(movie)
         collection.insert_one(movie)
         print('Insertado contenido CreatedAt:', movie['created_at'])
 
@@ -63,7 +62,7 @@ with DAG(
         schedule_interval='@daily'
 ) as dag:
 
-    with TaskGroup(group_id='data_lake_verification') as etl_setup:
+    with TaskGroup(group_id='etl_verification_group') as etl_setup:
         check_bucket = PythonOperator(
             task_id='check_s3_bucket',
             python_callable=check_bucket,
@@ -103,7 +102,7 @@ with DAG(
         check_bucket >> create_bucket >> empty_operator
         check_hdfs_dirs >> create_hdfs_dirs >> empty_operator
 
-    with TaskGroup(group_id='api_scrapper') as api_tasks:
+    with TaskGroup(group_id='api_scrapper_group') as api_tasks:
         api_task = PythonOperator(
             task_id='tmdb_api_to_local_mongo',
             python_callable=get_and_insert_data,
@@ -117,7 +116,7 @@ with DAG(
 
         api_task
 
-    with TaskGroup(group_id='mongo_pipeline') as pipeline_tasks:
+    with TaskGroup(group_id='data_pipelines_group') as pipeline_tasks:
         mongo_sensor_task = MongoSensor(
             task_id='mongo_tmdb_data_sensor',
             collection='movies',
