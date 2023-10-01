@@ -2,9 +2,22 @@
 airflow_env/
 airflow/logs/
 airflow/plugins/
+mongo_data/
+minio/
+airflow/dags/__pycache__/
+extraction/__pycache__
 
 # Extensions
 *.log
+*.txt
+*.json
+*.parquet
+*.avro
+*.csv
 
 # Files
-#airflow.cfg
+airflow.cfg
+airflow-webserver.pid
+webserver_config.py
+.env 
+
