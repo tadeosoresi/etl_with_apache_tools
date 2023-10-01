@@ -6,6 +6,7 @@ services:
     container_name: namenode
     restart: always
     ports:
+      - 127.0.0.1:9890:9000
       - 127.0.0.1:9870:9870
       - 127.0.0.1:9010:9000
     volumes:
