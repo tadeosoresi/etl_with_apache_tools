@@ -95,7 +95,8 @@ with DAG(
                 dag=dag
             )
         empty_operator = EmptyOperator(
-            task_id='empty_task', 
+            task_id='empty_task',
+            trigger_rule=TriggerRule.ALWAYS,
             dag=dag
         )
 
