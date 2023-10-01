@@ -39,6 +39,7 @@ def get_and_insert_data(mongo_conn_id, db, collection):
     for movie in movies:
         if any(_dict['id'] == movie['id'] for _dict in data_scraped): continue
         movie['created_at'] = date_of_execution
+        print(movie)
         collection.insert_one(movie)
         print('Insertado contenido CreatedAt:', movie['created_at'])
 
@@ -57,6 +58,7 @@ default_args = {
 with DAG(
         dag_id='etl_dag_v1',
         start_date=pendulum.yesterday(),
+        catchup=False,
         schedule_interval='@daily'
 ) as dag:
 
@@ -77,6 +79,7 @@ with DAG(
         )
 
         check_hdfs_dirs = HdfsSensor(
+            task_id='hdfs_dirs_sensor',
             filepath='/user/local-datalake/tmdb/movies/',
             hdfs_conn_id='hdfs_conn_id',
             ignore_copying=True,
@@ -85,7 +88,7 @@ with DAG(
             dag=dag
         )
         create_hdfs_dirs = BashOperator(
-                task_id='hadoop_dirs',
+                task_id='hdfs_dirs_creation',
                 bash_command='docker exec -it namenode bash "create.sh" || true',
                 trigger_rule=TriggerRule.ALL_FAILED,
                 dag=dag
@@ -152,6 +155,7 @@ with DAG(
             dag=dag
         )
         check_hdfs_parquet_file = HdfsSensor(
+            task_id='hdfs_parquet_sensor',
             filepath='/user/local-datalake/tmdb/movies/movies.parquet',
             hdfs_conn_id='hdfs_conn_id',
             ignore_copying=True,
@@ -162,4 +166,4 @@ with DAG(
 
         s3_sensor_task >> spark_task >> check_hdfs_parquet_file
     
-    data_lake_setup >> [api_group >> mongo_group >> data_lake_group]
+    data_lake_setup >> api_group >> mongo_group >> data_lake_group
