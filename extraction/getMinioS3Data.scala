@@ -2,7 +2,6 @@ import org.apache.spark.sql.SparkSession
 
 val s3MinioAccessKey = System.getenv("MINIO_ROOT_USER")
 val s3MinioSecretKey = System.getenv("MINIO_ROOT_PASSWORD")
-print(s3MinioAccessKey, s3MinioSecretKey)
 val s3MinioEndpoint = "http://172.103.0.16:9000"
 
 val spark = SparkSession.builder().appName("S3MinioData").getOrCreate()
@@ -21,7 +20,7 @@ val startTimeMillis = System.currentTimeMillis()
 val s3MinioBucket: String = "movies-datalake"
 val df = sqlContext.read.json("s3a://%s/movies.json".format(s3MinioBucket))
 df.write.option("compression", "snappy").mode("overwrite").parquet(
-                        "hdfs://172.103.0.17:9000/user/bbdataengineer/bbdata/%s/latest.parquet".format(lower_dir))
+                        "hdfs://172.103.0.17:9000/user/local-datalake/tmdb/movies.parquet".format(lower_dir))
 
 val endTimeMillis = System.currentTimeMillis()
 val durationMilliSeconds = (endTimeMillis - startTimeMillis)
