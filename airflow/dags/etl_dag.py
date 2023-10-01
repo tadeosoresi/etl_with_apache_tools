@@ -7,6 +7,7 @@ from airflow import DAG
 from airflow.utils.task_group import TaskGroup
 from airflow.exceptions import AirflowException
 from airflow.utils.trigger_rule import TriggerRule
+from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
@@ -62,7 +63,7 @@ with DAG(
         schedule_interval='@daily'
 ) as dag:
 
-    with TaskGroup(group_id='data_lake_verification') as data_lake_setup:
+    with TaskGroup(group_id='data_lake_verification') as etl_setup:
         check_bucket = PythonOperator(
             task_id='check_s3_bucket',
             python_callable=check_bucket,
@@ -93,11 +94,15 @@ with DAG(
                 trigger_rule=TriggerRule.ALL_FAILED,
                 dag=dag
             )
+        empty_operator = EmptyOperator(
+            task_id='empty_task', 
+            dag=dag
+        )
 
-        check_bucket >> create_bucket
-        check_hdfs_dirs >> create_hdfs_dirs
+        check_bucket >> create_bucket >> empty_operator
+        check_hdfs_dirs >> create_hdfs_dirs >> empty_operator
 
-    with TaskGroup(group_id='api_scrapper') as api_group:
+    with TaskGroup(group_id='api_scrapper') as api_tasks:
         api_task = PythonOperator(
             task_id='tmdb_api_to_local_mongo',
             python_callable=get_and_insert_data,
@@ -111,7 +116,7 @@ with DAG(
 
         api_task
 
-    with TaskGroup(group_id='mongo_pipeline') as mongo_group:
+    with TaskGroup(group_id='mongo_pipeline') as pipeline_tasks:
         mongo_sensor_task = MongoSensor(
             task_id='mongo_tmdb_data_sensor',
             collection='movies',
@@ -136,10 +141,7 @@ with DAG(
             allow_disk_use=True,
             dag=dag
         )
-
-        mongo_sensor_task >> mongo_to_s3_task 
     
-    with TaskGroup(group_id='data_lake_pipeline') as data_lake_group:
         s3_sensor_task = S3KeySensor(
             task_id='s3_sensor',
             aws_conn_id='aws_etl_id', 
@@ -164,6 +166,6 @@ with DAG(
             dag=dag
         )
 
-        s3_sensor_task >> spark_task >> check_hdfs_parquet_file
+        mongo_sensor_task >> mongo_to_s3_task >> s3_sensor_task >> spark_task >> check_hdfs_parquet_file
     
-    data_lake_setup >> api_group >> mongo_group >> data_lake_group
+    etl_setup >> api_tasks >> mongo_group >> pipeline_tasks
