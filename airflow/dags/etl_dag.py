@@ -75,15 +75,16 @@ with DAG(
     )
 
     check_hdfs_dirs = HdfsSensor(
-        filepath='/user/local-datalake/tmdb/movies/',
+        task_id='check_hdfs_dirs',
+        filepath='/user/local-datalake/tmdb/movies',
         hdfs_conn_id='hdfs_conn_id',
         ignore_copying=True,
-        poke_interval=5,
-        timeout=30,
+        poke_interval=3,
+        timeout=15,
         dag=dag
     )
     create_hdfs_dirs = BashOperator(
-            task_id='hadoop_dirs',
+            task_id='create_hdfs_dirs',
             bash_command='docker exec -it namenode bash "create.sh" || true',
             trigger_rule=TriggerRule.ALL_FAILED,
             dag=dag
