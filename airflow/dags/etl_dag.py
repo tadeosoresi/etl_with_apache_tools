@@ -4,6 +4,7 @@ import time
 import pendulum
 from datetime import datetime, timedelta
 from airflow import DAG
+from airflow.utils.task_group import TaskGroup
 from airflow.exceptions import AirflowException
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.operators.python import PythonOperator
@@ -59,85 +60,106 @@ with DAG(
         schedule_interval='@daily'
 ) as dag:
 
-    check_bucket = PythonOperator(
-        task_id='check_s3_bucket',
-        python_callable=check_bucket,
-        op_kwargs={'bucket_name': 'movies-datalake', 
-                    'aws_conn_id': 'aws_etl_id'},
-        dag=dag
-    )
-    create_bucket = S3CreateBucketOperator(
-        task_id='create_s3_bucket',
-        aws_conn_id='aws_etl_id',
-        bucket_name='movies-datalake',
-        trigger_rule=TriggerRule.ALL_FAILED,
-        dag=dag
-    )
-
-    check_hdfs_dirs = HdfsSensor(
-        filepath='/user/local-datalake/tmdb/movies/',
-        hdfs_conn_id='hdfs_conn_id',
-        ignore_copying=True,
-        poke_interval=5,
-        timeout=30,
-        dag=dag
-    )
-    create_hdfs_dirs = BashOperator(
-            task_id='hadoop_dirs',
-            bash_command='docker exec -it namenode bash "create.sh" || true',
+    with TaskGroup(group_id='data_lake_verification') as data_lake_setup:
+        check_bucket = PythonOperator(
+            task_id='check_s3_bucket',
+            python_callable=check_bucket,
+            op_kwargs={'bucket_name': 'movies-datalake', 
+                        'aws_conn_id': 'aws_etl_id'},
+            dag=dag
+        )
+        create_bucket = S3CreateBucketOperator(
+            task_id='create_s3_bucket',
+            aws_conn_id='aws_etl_id',
+            bucket_name='movies-datalake',
             trigger_rule=TriggerRule.ALL_FAILED,
             dag=dag
         )
 
-    task1 = PythonOperator(
-        task_id='tmdb_api_to_local_mongo',
-        python_callable=get_and_insert_data,
-        op_kwargs={ # Las keys deben coincidir con los parametros de la funcion!! incluso en nombre
-            'mongo_conn_id': 'mongo_etl_id',
-            'db': 'tmdb_data',
-            'collection': 'movies'
-        },
-        dag=dag
-    )
-    task2 = MongoSensor(
-        task_id='mongo_tmdb_data_sensor',
-        collection='movies',
-        query={'created_at': date_of_execution},
-        mongo_conn_id='mongo_etl_id',
-        mongo_db='tmdb_data',
-        poke_interval=20,
-        timeout=480, 
-        dag=dag
-    )
-    task3 = MongoToS3Operator(
-        task_id='mongo_to_s3',
-        mongo_conn_id='mongo_etl_id',
-        aws_conn_id='aws_etl_id',
-        mongo_collection='movies',
-        mongo_query={},
-        mongo_projection={'_id': 0},
-        s3_bucket='movies-datalake',
-        s3_key='movies.json',
-        mongo_db='tmdb_data',
-        replace=True,
-        allow_disk_use=True,
-        dag=dag
-    )
-    task4 = S3KeySensor(
-        task_id='s3_sensor',
-        aws_conn_id='aws_etl_id', 
-        bucket_name='movies-datalake',
-        bucket_key='movies.json',
-        poke_interval=20,
-        timeout=480, 
-        dag=dag
-    )
-    task5 = BashOperator(
-        task_id='s3_data_extraction',
-        bash_command='docker exec -it spark-master /spark/bin/spark-shell -i /scalafiles/getMinioS3Data.scala',
-        dag=dag
-    )
+        check_hdfs_dirs = HdfsSensor(
+            filepath='/user/local-datalake/tmdb/movies/',
+            hdfs_conn_id='hdfs_conn_id',
+            ignore_copying=True,
+            poke_interval=5,
+            timeout=30,
+            dag=dag
+        )
+        create_hdfs_dirs = BashOperator(
+                task_id='hadoop_dirs',
+                bash_command='docker exec -it namenode bash "create.sh" || true',
+                trigger_rule=TriggerRule.ALL_FAILED,
+                dag=dag
+            )
 
-    check_bucket >> create_bucket
-    check_hdfs_dirs >> create_hdfs_dirs
-    task1 >> task2 >> task3 >> task4 >> task5
+        check_bucket >> create_bucket
+        check_hdfs_dirs >> create_hdfs_dirs
+
+    with TaskGroup(group_id='api_scrapper') as api_group:
+        api_task = PythonOperator(
+            task_id='tmdb_api_to_local_mongo',
+            python_callable=get_and_insert_data,
+            op_kwargs={ # Las keys deben coincidir con los parametros de la funcion!! incluso en nombre
+                'mongo_conn_id': 'mongo_etl_id',
+                'db': 'tmdb_data',
+                'collection': 'movies'
+            },
+            dag=dag
+        )
+
+        api_task
+
+    with TaskGroup(group_id='mongo_pipeline') as mongo_group:
+        mongo_sensor_task = MongoSensor(
+            task_id='mongo_tmdb_data_sensor',
+            collection='movies',
+            query={'created_at': date_of_execution},
+            mongo_conn_id='mongo_etl_id',
+            mongo_db='tmdb_data',
+            poke_interval=20,
+            timeout=480, 
+            dag=dag
+        )
+        mongo_to_s3_task = MongoToS3Operator(
+            task_id='mongo_to_s3',
+            mongo_conn_id='mongo_etl_id',
+            aws_conn_id='aws_etl_id',
+            mongo_collection='movies',
+            mongo_query={},
+            mongo_projection={'_id': 0},
+            s3_bucket='movies-datalake',
+            s3_key='movies.json',
+            mongo_db='tmdb_data',
+            replace=True,
+            allow_disk_use=True,
+            dag=dag
+        )
+
+        mongo_sensor_task >> mongo_to_s3_task 
+    
+    with TaskGroup(group_id='data_lake_pipeline') as data_lake_group:
+        s3_sensor_task = S3KeySensor(
+            task_id='s3_sensor',
+            aws_conn_id='aws_etl_id', 
+            bucket_name='movies-datalake',
+            bucket_key='movies.json',
+            poke_interval=20,
+            timeout=480, 
+            dag=dag
+        )
+        spark_task = BashOperator(
+            task_id='spark_s3_data_extraction',
+            bash_command='docker exec -it spark-master /spark/bin/spark-shell -i /scalafiles/getMinioS3Data.scala',
+            dag=dag
+        )
+        check_hdfs_parquet_file = HdfsSensor(
+            filepath='/user/local-datalake/tmdb/movies/movies.parquet',
+            hdfs_conn_id='hdfs_conn_id',
+            ignore_copying=True,
+            poke_interval=5,
+            timeout=30,
+            dag=dag
+        )
+
+        s3_sensor_task >> spark_task >> check_hdfs_parquet_file
+    
+    data_lake_setup >> [api_group >> mongo_group >> data_lake_group]
