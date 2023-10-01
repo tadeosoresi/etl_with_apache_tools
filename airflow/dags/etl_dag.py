@@ -168,4 +168,4 @@ with DAG(
 
         mongo_sensor_task >> mongo_to_s3_task >> s3_sensor_task >> spark_task >> check_hdfs_parquet_file
     
-    etl_setup >> api_tasks >> mongo_group >> pipeline_tasks
+    etl_setup >> api_tasks >> pipeline_tasks
