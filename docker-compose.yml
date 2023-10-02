@@ -138,6 +138,8 @@ services:
     command: /opt/hive/bin/hive --service metastore
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode:9864 hive-metastore-postgresql:5432"
+    ports:
+      - 127.0.0.1:9083:9083
     expose:
       - 9083
     networks:
