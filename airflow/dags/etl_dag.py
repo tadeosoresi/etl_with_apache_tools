@@ -53,7 +53,8 @@ def check_bucket(bucket_name, aws_conn_id):
 default_args = {
                     'owner': 'etl_data_engineer',
                     'reties': 10,
-                    'retry_delay': timedelta(minutes=2)
+                    'retry_delay': timedelta(minutes=1),
+                    'execution_timeout': timedelta(hours=24)
                 }
 with DAG(
         dag_id='etl_dag_v1',
