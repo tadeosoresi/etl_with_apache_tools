@@ -15,7 +15,8 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.providers.mongo.sensors.mongo import MongoSensor
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
 from airflow.providers.apache.hdfs.sensors.hdfs import HdfsSensor
-from airflow.providers.apache.hive.operators.hive import HiveOperator
+from airflow.providers.apache.hive.hooks.hive import HiveServer2Hook
+from airflow.providers.apache.hive.hooks.hive import HiveMetastoreHook
 from airflow.providers.amazon.aws.operators.s3 import S3CreateBucketOperator
 from airflow.providers.amazon.aws.transfers.mongo_to_s3 import MongoToS3Operator
 try:
@@ -51,6 +52,15 @@ def check_bucket(bucket_name, aws_conn_id):
     bucket_exists = s3_hook.check_for_bucket(bucket_name)
     assert bucket_exists, f'Bucket {bucket_name} not exists! creating...'
 
+def hive_hooks(db, table, hive_conn):
+    """
+    """
+    hook = HiveMetastoreHook(metastore_conn_id=hive_conn)
+    databases = hook.get_databases()
+    print(hive_hooks)
+    t = hh.get_table(db=db, table_name=db)
+    print(t.tableName)
+    
 default_args = {
                     'owner': 'etl_data_engineer',
                     'reties': 10,
@@ -175,14 +185,18 @@ with DAG(
             dag=dag
         )
 
-        hive_setup_task = HiveOperator(
-            task_id='hive_table',
-            hive_cli_conn_id='hive_etl_id',
-            hql='./load/create_table.hql',
-            run_as_owner=True,
+        hive_operations_task = PythonOperator(
+            task_id='hive_operations',
+            python_callable=hive_hooks,
+            op_kwargs={
+                        'db': 'warehouse', 
+                        'table': 'movies',
+                        'hive_conn': 'hive_etl_id'
+                    },
+            trigger_rule=TriggerRule.ALL_FAILED,
             dag=dag
         )
 
-        check_hdfs_parquet_file >> hive_setup_task
+        check_hdfs_parquet_file >> hive_operations_task
 
     etl_setup >> api_tasks >> first_pipeline >> second_pipeline
