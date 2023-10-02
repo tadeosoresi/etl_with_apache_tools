@@ -58,7 +58,7 @@ def hive_hooks(db, table, hive_conn):
     hook = HiveMetastoreHook(metastore_conn_id=hive_conn)
     databases = hook.get_databases()
     print(hive_hooks)
-    t = hh.get_table(db=db, table_name=db)
+    t = hook.get_table(db=db, table_name=db)
     print(t.tableName)
     
 default_args = {
@@ -92,7 +92,7 @@ with DAG(
 
         check_hdfs_dirs = HdfsSensor(
             task_id='hdfs_dirs_sensor',
-            filepath='/user/local-datalake/tmdb/movies/',
+            filepath='/user/local-datalake/tmdb/',
             hdfs_conn_id='hdfs_conn_id',
             ignore_copying=True,
             poke_interval=5,
