@@ -50,5 +50,5 @@ STORED AS PARQUET
 LOCATION '/user/local-datalake/tmdb/movies.parquet'
 TBLPROPERTIES ("parquet.compression"="SNAPPY");
 
-CREATE INDEX IF NOT EXISTS movies_general_index ON TABLE movies(created_at, media_type)
+CREATE INDEX movies_general_index ON TABLE movies(created_at, media_type)
 AS 'org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler' WITH DEFERRED REBUILD;
