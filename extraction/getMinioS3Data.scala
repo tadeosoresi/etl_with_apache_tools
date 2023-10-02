@@ -12,16 +12,16 @@ spark.sparkContext.hadoopConfiguration.set("spark.sql.debug.maxToStringFields", 
 spark.sparkContext.hadoopConfiguration.set("fs.s3a.path.style.access", "true")
 spark.sparkContext.hadoopConfiguration.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
 spark.sparkContext.hadoopConfiguration.set("fs.s3a.connection.ssl.enabled", "false")
+spark.sparkContext.hadoopConfiguration.set("spark.hadoop.fs.defaultFS", "hdfs://172.103.0.17:9000/user/local-datalake")
+spark.sparkContext.hadoopConfiguration.set("spark.sql.warehouse.dir", "hdfs://172.103.0.17:9000/user/local-datalake")
 
 // Loading csv from Minio to DataFrame:
 val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 val startTimeMillis = System.currentTimeMillis()
 
 val s3MinioBucket: String = "movies-datalake"
-val external_database: String = "tmdb"
 val df = sqlContext.read.json("s3a://%s/movies.json".format(s3MinioBucket))
-df.write.option("compression", "snappy").mode("overwrite").parquet(
-                "hdfs://172.103.0.17:9000/user/local-datalake/%s/movies.parquet".format(external_database))
+df.write.option("compression", "snappy").mode("overwrite").parquet("hdfs://172.103.0.17:9000/user/local-datalake/tmdb/movies.parquet")
 
 val endTimeMillis = System.currentTimeMillis()
 val durationMilliSeconds = (endTimeMillis - startTimeMillis)
