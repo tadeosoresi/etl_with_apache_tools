@@ -55,11 +55,8 @@ def check_bucket(bucket_name, aws_conn_id):
 def hive_hooks(db, table, hive_conn):
     """
     """
-    hook = HiveMetastoreHook(metastore_conn_id=hive_conn)
-    databases = hook.get_databases()
-    print(hive_hooks)
-    t = hook.get_table(db=db, table_name=db)
-    print(t.tableName)
+    check_table = hook.table_exists(db=db, table_name=table)
+    print(check_table)
     
 default_args = {
                     'owner': 'etl_data_engineer',
