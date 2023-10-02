@@ -120,7 +120,7 @@ services:
     env_file:
       - ./cluster_config_files/hadoop-hive.env
     volumes:
-      - hive_scripts:/home
+      - ./load:/opt/hive_scripts/
     environment:
       HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
       SERVICE_PRECONDITION: "hive-metastore:9083"

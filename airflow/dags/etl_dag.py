@@ -55,8 +55,17 @@ def check_bucket(bucket_name, aws_conn_id):
 def hive_hooks(db, table, hive_conn):
     """
     """
+    hook = HiveMetastoreHook(metastore_conn_id=hive_conn)
     check_table = hook.table_exists(db=db, table_name=table)
     print(check_table)
+    if check_table == False:
+        hive_tables_setup = BashOperator(
+            task_id='hive_tables_setup_id',
+            bash_command=('docker exec -it hive-server bash -c "hive -f /opt/hive_scripts/create_table.hql"'),
+            dag=dag
+        )
+        hive_tables_setup.execute(context={})
+        print('HIVE DATABASE AND TABLE CREATED!')
     
 default_args = {
                     'owner': 'etl_data_engineer',
