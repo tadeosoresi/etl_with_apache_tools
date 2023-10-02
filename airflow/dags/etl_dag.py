@@ -14,7 +14,8 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.providers.mongo.sensors.mongo import MongoSensor
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
-from airflow.providers.apache.hdfs.sensors.hdfs import HdfsSensor 
+from airflow.providers.apache.hdfs.sensors.hdfs import HdfsSensor
+from airflow.providers.apache.hive.operators.hive import HiveOperator
 from airflow.providers.amazon.aws.operators.s3 import S3CreateBucketOperator
 from airflow.providers.amazon.aws.transfers.mongo_to_s3 import MongoToS3Operator
 try:
@@ -117,7 +118,7 @@ with DAG(
 
         api_task
 
-    with TaskGroup(group_id='data_pipelines_group') as pipeline_tasks:
+    with TaskGroup(group_id='mongo_s3_spark_group') as first_pipeline:
         mongo_sensor_task = MongoSensor(
             task_id='mongo_tmdb_data_sensor',
             collection='movies',
@@ -152,11 +153,18 @@ with DAG(
             timeout=480, 
             dag=dag
         )
+        """
         spark_task = BashOperator(
             task_id='spark_s3_data_extraction',
             bash_command='docker exec -it spark-master /spark/bin/spark-shell -i /scalafiles/getMinioS3Data.scala',
             dag=dag
         )
+        spark_task
+        """
+        mongo_sensor_task >> mongo_to_s3_task >> s3_sensor_task
+    
+    with TaskGroup(group_id='hdfs_hive_group') as second_pipeline:
+
         check_hdfs_parquet_file = HdfsSensor(
             task_id='hdfs_parquet_sensor',
             filepath='/user/local-datalake/tmdb/movies/movies.parquet',
@@ -167,6 +175,14 @@ with DAG(
             dag=dag
         )
 
-        mongo_sensor_task >> mongo_to_s3_task >> s3_sensor_task >> spark_task >> check_hdfs_parquet_file
-    
-    etl_setup >> api_tasks >> pipeline_tasks
+        hive_setup_task = HiveOperator(
+            task_id='hive_table',
+            hive_cli_conn_id='hive_etl_id',
+            hql='./load/create_table.hql',
+            run_as_owner=True,
+            dag=dag
+        )
+
+        check_hdfs_parquet_file >> hive_setup_task
+
+    etl_setup >> api_tasks >> first_pipeline >> second_pipeline
