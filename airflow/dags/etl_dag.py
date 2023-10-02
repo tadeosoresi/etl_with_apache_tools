@@ -60,12 +60,20 @@ def hive_hooks(db, table, hive_conn):
     print(check_table)
     if check_table == False:
         hive_tables_setup = BashOperator(
-            task_id='hive_tables_setup_id',
+            task_id='hive_tables_setup',
             bash_command=('docker exec -it hive-server bash -c "hive -f /opt/hive_scripts/create_table.hql"'),
             dag=dag
         )
         hive_tables_setup.execute(context={})
         print('HIVE DATABASE AND TABLE CREATED!')
+    else:
+        incremental_hive_data = BashOperator(
+            task_id='load_data_into_hive',
+            bash_command=('docker exec -it hive-server bash -c "hive -f /opt/hive_scripts/load_data.hql"'),
+            dag=dag
+        )
+        incremental_hive_data.execute(context={})
+        print('DATA LOADED IN HIVE WAREHOUSE!')
     
 default_args = {
                     'owner': 'etl_data_engineer',
@@ -169,15 +177,14 @@ with DAG(
             timeout=480, 
             dag=dag
         )
-        """
+
         spark_task = BashOperator(
             task_id='spark_s3_data_extraction',
-            bash_command='docker exec -it spark-master /spark/bin/spark-shell -i /scalafiles/getMinioS3Data.scala',
+            bash_command='docker exec -it spark-master /spark/bin/spark-shell --driver-memory 8G -i /scalafiles/getMinioS3Data.scala',
             dag=dag
         )
-        spark_task
-        """
-        mongo_sensor_task >> mongo_to_s3_task >> s3_sensor_task
+        
+        mongo_sensor_task >> mongo_to_s3_task >> s3_sensor_task >> spark_task
     
     with TaskGroup(group_id='hdfs_hive_group') as second_pipeline:
 
