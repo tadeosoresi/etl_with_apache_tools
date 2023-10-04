@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import json
 import pendulum
 from datetime import datetime, timedelta
 from airflow import DAG
@@ -44,6 +45,18 @@ def get_and_insert_data(mongo_conn_id, db, collection):
         movie['created_at'] = date_of_execution
         collection.insert_one(movie)
         print('Insertado contenido CreatedAt:', movie['created_at'])
+
+def transform_data(mongo_conn_id, db, collection):
+    """
+    """
+    f = open('./transform/set_dates.json')
+    query = json.load(f)
+    hook = MongoHook(conn_id=mongo_conn_id)
+    client = hook.get_conn()
+    collection = client[db][collection]
+    collection.update_many({'created_at': date_of_execution}, query)
+    print('MongoDB data succesfully updated!')
+    f.close()
 
 def check_bucket(bucket_name, aws_conn_id):
     """
@@ -153,6 +166,18 @@ with DAG(
             timeout=480, 
             dag=dag
         )
+
+        transform_mongo_data = PythonOperator(
+            task_id='transform_date_fields',
+            python_callable=transform_data,
+            op_kwargs={ # Las keys deben coincidir con los parametros de la funcion!! incluso en nombre
+                'mongo_conn_id': 'mongo_etl_id',
+                'db': 'tmdb_data',
+                'collection': 'movies'
+            },
+            dag=dag
+        )
+
         mongo_to_s3_task = MongoToS3Operator(
             task_id='mongo_to_s3',
             mongo_conn_id='mongo_etl_id',
@@ -184,7 +209,7 @@ with DAG(
             dag=dag
         )
         
-        mongo_sensor_task >> mongo_to_s3_task >> s3_sensor_task >> spark_task
+        mongo_sensor_task >> transform_mongo_data >> mongo_to_s3_task >> s3_sensor_task >> spark_task
     
     with TaskGroup(group_id='hdfs_hive_group') as second_pipeline:
 
@@ -197,7 +222,7 @@ with DAG(
             timeout=30,
             dag=dag
         )
-
+        """
         hive_operations_task = PythonOperator(
             task_id='hive_operations',
             python_callable=hive_hooks,
@@ -209,7 +234,8 @@ with DAG(
             trigger_rule=TriggerRule.ALL_FAILED,
             dag=dag
         )
-
-        check_hdfs_parquet_file >> hive_operations_task
+        >> hive_operations_task
+        """
+        check_hdfs_parquet_file 
 
     etl_setup >> api_tasks >> first_pipeline >> second_pipeline
