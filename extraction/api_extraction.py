@@ -4,7 +4,6 @@ from typing import Union
 from typing import Iterator
 import json
 import requests
-from airflow.providers.mongo.hooks.mongo import MongoHook
 
 class TMDBApiData():
     """
@@ -26,31 +25,30 @@ class TMDBApiData():
             print(f'Scraping page {page} of TMDB API')
             url = cls.movies_endpoint.format(page)
             response = cls.get_response(url, cls.headers)
-            if response.get('success', None) == False or page == 50: break
+            if response.get('success', None) == False or page == 5: break
             results = response.get('results')
             for content in results:
                 content_id = content['id']
                 if content_id in cls.content_ids: continue
-                content['cast'] = cls.get_cast(content_id)
+                content['cast'], contenr['crew'] = cls.get_cast_and_crew(content_id)
                 yield content
             page += 1
         print('\n\x1b[1;33;40mAPI Scraping Done!\x1b[0m\n')
     
     @classmethod
-    def get_cast(cls, content_id:int) -> Union[None, dict]:
+    def get_cast_and_crew(cls, content_id:int) -> Union[None, dict]:
         """
         """
         url = cls.cast_endpoint.format(content_id)
         response = cls.get_response(url, cls.headers)
         cast = response.get('cast')
-        if not cast: return None
-        keys_to_keep = ['known_for_department',
-                        'name',
-                        'original_name',
-                        'popularity']
-        response['cast'] = [{key: value for key, value in _dict.items() if key in keys_to_keep} for _dict in cast]
+        crew = response.get('crew')
+        keys_to_keep = ['name', 'original_name']
+        keys_to_keep_crew = ['original_name', 'job']
+        response['cast'] = [{key: value for key, value in _dict.items() if key in keys_to_keep} for _dict in cast] if cast else None
+        response['crew'] = [{key: value for key, value in _dict.items() if key in keys_to_keep_crew} for _dict in crew] if crew else None
         del response['id']
-        return response
+        return response['cast'], response['crew']
     
     @staticmethod
     def get_response(url:str, headers:dict) -> dict:
