@@ -55,22 +55,7 @@ def transform_data(mongo_conn_id, db, collection):
     hook = MongoHook(conn_id=mongo_conn_id)
     client = hook.get_conn()
     collection = client[db][collection]
-    collection.update_many({'created_at': date_of_execution}, { 
-        "$set": { 
-                    "created_at": { 
-                        "$dateFromString": { 
-                            "dateString": "$created_at",
-                            "format": "%Y-%m-%d" 
-                            }
-                    },
-                    "release_date": {
-                        "$dateFromString": { 
-                            "dateString": "$release_date",
-                            "format": "%Y-%m-%d" 
-                            }
-                    }
-                }
-        })
+    collection.update_many({'created_at': date_of_execution}, query)
     print('MongoDB data succesfully updated!')
     f.close()
 
