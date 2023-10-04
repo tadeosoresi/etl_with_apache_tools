@@ -3,30 +3,17 @@ USE warehouse;
 CREATE TABLE IF NOT EXISTS movies(
     adult BOOLEAN,
     backdrop_path STRING,
-    `cast` STRUCT< 
-                    `cast`: ARRAY<STRUCT< 
-                                            know_for_department: STRING,
-                                            name: STRING,
-                                            original_name: STRING,
-                                            popularity: DOUBLE
-                                        >
+    `cast`  ARRAY< 
+                STRUCT  < 
+                            know_for_department: STRING,
+                            original_name: STRING
                         >
-                    
-                >,
-    crew ARRAY<
-                STRUCT<
-                        adult: BOOLEAN,
-                        credit_id: STRING,
-                        department: STRING,
-                        gender: DOUBLE,
-                        id: DOUBLE,
-                        job: STRING,
-                        know_for_department: STRING,
-                        name: STRING,
-                        original_name: STRING,
-                        popularity: DOUBLE,
-                        profile_path: STRING
-                    >
+            >,
+    crew    ARRAY<
+                STRUCT  <
+                            job: STRING,
+                            original_name: STRING
+                        >
             >,
     created_at STRING,
     genre_ids ARRAY<DOUBLE>,
