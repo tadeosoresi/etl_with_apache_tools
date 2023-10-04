@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS movies(
                             original_name: STRING
                         >
             >,
-    created_at STRING,
+    created_at DATE,
     genre_ids ARRAY<DOUBLE>,
     id DOUBLE,
     media_type STRING,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS movies(
     overview STRING,
     popularity DOUBLE,
     poster_path STRING,
-    release_date STRING,
+    release_date DATE,
     title STRING,
     video BOOLEAN,
     vote_average DOUBLE,
