@@ -51,10 +51,26 @@ def transform_data(mongo_conn_id, db, collection):
     """
     f = open('./transform/set_dates.json')
     query = json.load(f)
+    print(query)
     hook = MongoHook(conn_id=mongo_conn_id)
     client = hook.get_conn()
     collection = client[db][collection]
-    collection.update_many({'created_at': date_of_execution}, query)
+    collection.update_many({'created_at': date_of_execution}, { 
+        "$set": { 
+                    "created_at": { 
+                        "$dateFromString": { 
+                            "dateString": "$created_at",
+                            "format": "%Y-%m-%d" 
+                            }
+                    },
+                    "release_date": {
+                        "$dateFromString": { 
+                            "dateString": "$release_date",
+                            "format": "%Y-%m-%d" 
+                            }
+                    }
+                }
+        })
     print('MongoDB data succesfully updated!')
     f.close()
 
@@ -222,7 +238,7 @@ with DAG(
             timeout=30,
             dag=dag
         )
-        """
+        
         hive_operations_task = PythonOperator(
             task_id='hive_operations',
             python_callable=hive_hooks,
@@ -234,8 +250,8 @@ with DAG(
             trigger_rule=TriggerRule.ALL_FAILED,
             dag=dag
         )
-        >> hive_operations_task
-        """
-        check_hdfs_parquet_file 
+        
+        
+        check_hdfs_parquet_file >> hive_operations_task
 
     etl_setup >> api_tasks >> first_pipeline >> second_pipeline
