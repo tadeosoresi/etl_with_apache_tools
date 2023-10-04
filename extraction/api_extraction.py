@@ -43,7 +43,7 @@ class TMDBApiData():
         response = cls.get_response(url, cls.headers)
         cast = response.get('cast')
         crew = response.get('crew')
-        keys_to_keep = ['name', 'original_name']
+        keys_to_keep = ['know_for_department', 'original_name']
         keys_to_keep_crew = ['original_name', 'job']
         response['cast'] = [{key: value for key, value in _dict.items() if key in keys_to_keep} for _dict in cast] if cast else None
         response['crew'] = [{key: value for key, value in _dict.items() if key in keys_to_keep_crew} for _dict in crew] if crew else None
