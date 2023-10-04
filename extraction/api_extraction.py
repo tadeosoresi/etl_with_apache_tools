@@ -30,7 +30,7 @@ class TMDBApiData():
             for content in results:
                 content_id = content['id']
                 if content_id in cls.content_ids: continue
-                content['cast'], contenr['crew'] = cls.get_cast_and_crew(content_id)
+                content['cast'], content['crew'] = cls.get_cast_and_crew(content_id)
                 yield content
             page += 1
         print('\n\x1b[1;33;40mAPI Scraping Done!\x1b[0m\n')
