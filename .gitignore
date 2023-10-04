@@ -10,7 +10,6 @@ extraction/__pycache__
 # Extensions
 *.log
 *.txt
-*.json
 *.parquet
 *.avro
 *.csv
