@@ -21,7 +21,7 @@ val startTimeMillis = System.currentTimeMillis()
 
 val s3MinioBucket: String = "movies-datalake"
 val df = sqlContext.read.json("s3a://%s/movies.json".format(s3MinioBucket))
-df.withColumn("created_at", col("created_at").getItem(0).$created_at) \
+df = df.withColumn("created_at", col("created_at").getItem(0).$created_at) \
         .withColumn("release_date", col("release_date").getItem(0).$release_date)
 print(df.printSchema())
 df.write.option("compression", "snappy").mode("overwrite").parquet("hdfs://172.103.0.17:9000/user/local-datalake/tmdb/movies.parquet")
