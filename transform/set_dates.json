@@ -1,7 +1,7 @@
 [  
     { 
         "$set": { 
-                    "created_at": {"$toDate": "$createdAt"},
+                    "created_at": {"$toDate": "$created_at"},
                     "release_date": {"$toDate": "$release_date"}
                 }
     }
