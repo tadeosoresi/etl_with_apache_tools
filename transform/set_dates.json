@@ -1,6 +1,18 @@
-{ 
-    "$set": { 
-                "created_at": {"$toDate": "$created_at"},
-                "release_date": {"$toDate": "$release_date"}
-            }
-}
+[  
+    { 
+        "$set": { 
+                    "created_at": { 
+                        "$dateFromString": { 
+                            "dateString": "$created_at",
+                            "format": "%Y-%m-%d" 
+                            }
+                    },
+                    "release_date": {
+                        "$dateFromString": { 
+                            "dateString": "$release_date",
+                            "format": "%Y-%m-%d" 
+                            }
+                    }
+                }
+    }
+]
