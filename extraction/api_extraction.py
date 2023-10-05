@@ -7,6 +7,12 @@ import requests
 
 class TMDBApiData():
     """
+    Clase que se encarga de obtener los datos de TMDB.
+    Class variables:
+        movies_endpoint:str
+        cast_endpoint:str
+        headers: dict + os.environ variable (setear manualmente)
+        content_ids: list
     """
     movies_endpoint = "https://api.themoviedb.org/3/trending/movie/week?language=en-US&page={}"
     cast_endpoint = "https://api.themoviedb.org/3/movie/{}/credits?language=en-US"
@@ -19,6 +25,12 @@ class TMDBApiData():
     @classmethod
     def get_data(cls) -> Iterator:
         """
+        Metodo de clase.
+        Obtiene datos de la api de TMDB iterando sus paginas hasta un limite
+        Args:
+            -
+        Returns:
+            content:Iterator
         """
         page = 1
         while True:
@@ -38,6 +50,12 @@ class TMDBApiData():
     @classmethod
     def get_cast_and_crew(cls, content_id:int) -> Union[None, dict]:
         """
+        Metodo para obtener Cast & Crew (dicts) del endpoint de la API.
+        Almacena ciertas keys importantes y elimina las que no necesitamos.
+        Args:
+            content_id:int
+        Returns:
+            response fields (None or dict with data)
         """
         url = cls.cast_endpoint.format(content_id)
         response = cls.get_response(url, cls.headers)
@@ -53,8 +71,12 @@ class TMDBApiData():
     @staticmethod
     def get_response(url:str, headers:dict) -> dict:
         """
-        Metodo que hace requests y parsea a JSON.
-        Returns: JSON object
+        Metodo que hace API requests y parsea a JSON.
+        Args:
+            url:str
+            headers:dict
+        Returns: 
+            JSON object
         """
         seconds = 10
         tries = 0
