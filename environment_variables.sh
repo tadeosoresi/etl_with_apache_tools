@@ -12,6 +12,6 @@ export POSTGRES_USER=etlDataEngineer
 export POSTGRES_PASSWORD=etl1234
 export POSTGRES_DB=etl_database
 export SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5444/${POSTGRES_DB}
-export TMDB_API_TOKEN=''
+export TMDB_API_TOKEN='' # completar 
 export AIRFLOW_CONN_MONGO_DEFAULT='mongodb://127.0.0.1:27018'
 # to run: source environment_variables.sh
