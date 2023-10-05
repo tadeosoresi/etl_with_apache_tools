@@ -29,8 +29,17 @@ from extraction.api_extraction import TMDBApiData
 
 date_of_execution = time.strftime("%Y-%m-%d")
 print(f'Date of execution: {date_of_execution}')
-def get_and_insert_data(mongo_conn_id, db, collection):
+def get_and_insert_data(mongo_conn_id:str, db:str, collection:str) -> None:
     """
+    Función que recibe e inserta cada contenido scrapeado de la API TMDB.
+    La inserción se hace via MongoHook, previa validación que el content id
+    no esta en la DB.
+    Args:
+        mongo_conn_id: str
+        db: str
+        collection: str
+    Returns:
+        None
     """
     hook = MongoHook(conn_id=mongo_conn_id)
     client = hook.get_conn()
@@ -46,8 +55,15 @@ def get_and_insert_data(mongo_conn_id, db, collection):
         collection.insert_one(movie)
         print('Insertado contenido CreatedAt:', movie['created_at'])
 
-def transform_data(mongo_conn_id, db, collection):
+def transform_data(mongo_conn_id:str, db:str, collection:str) -> None:
     """
+    Función para modificar tipo fields en mongo (string-> dates).
+    Utiliza la JSON Query de la carpeta transform y via MongoHook
+    hace el update_many.
+    Args:
+        mongo_conn_id:str
+        db: str
+        collection:str
     """
     f = open('./transform/set_dates.json')
     query = json.load(f)
@@ -59,19 +75,34 @@ def transform_data(mongo_conn_id, db, collection):
     print('MongoDB data succesfully updated!')
     f.close()
 
-def check_bucket(bucket_name, aws_conn_id):
+def check_bucket(bucket_name:str, aws_conn_id:str) -> None:
     """
+    Función para validar el Bucket en AWS (Minio) via S3Hook.
+    Args:
+        bucket_name:str
+        aws_conn_id:str
+    Retuns:
+        None
     """
     s3_hook = S3Hook(aws_conn_id)
     bucket_exists = s3_hook.check_for_bucket(bucket_name)
     assert bucket_exists, f'Bucket {bucket_name} not exists! creating...'
 
-def hive_hooks(db, table, hive_conn):
+def hive_hooks(db:str, table:str, hive_conn:str) -> None:
     """
+    Función para validar tabla principal en Hive.
+    Si falla el Hook, ejecuta via BashOperator una query de Hive
+    para crear la DB y la tabla schema. Si detecta la tabla, se inserta
+    datos en la tabal via load_data.hql (parquet to hive).
+    Args:
+        db:str
+        table:str
+        hive_conn:str
+    Returns:
+        None
     """
     hook = HiveMetastoreHook(metastore_conn_id=hive_conn)
     check_table = hook.table_exists(db=db, table_name=table)
-    print(check_table)
     if check_table == False:
         hive_tables_setup = BashOperator(
             task_id='hive_tables_setup',
@@ -101,7 +132,7 @@ with DAG(
         catchup=False,
         schedule_interval='@daily'
 ) as dag:
-
+    # Group to setup ETL
     with TaskGroup(group_id='etl_verification_group') as etl_setup:
         check_bucket = PythonOperator(
             task_id='check_s3_bucket',
@@ -142,6 +173,7 @@ with DAG(
         check_bucket >> create_bucket >> empty_operator
         check_hdfs_dirs >> create_hdfs_dirs >> empty_operator
 
+    # Group to get TMDB data via scrapper
     with TaskGroup(group_id='api_scrapper_group') as api_tasks:
         api_task = PythonOperator(
             task_id='tmdb_api_to_local_mongo',
@@ -156,6 +188,7 @@ with DAG(
 
         api_task
 
+    # Group to make Mongo, Minio and Spark operations
     with TaskGroup(group_id='mongo_s3_spark_group') as first_pipeline:
         mongo_sensor_task = MongoSensor(
             task_id='mongo_tmdb_data_sensor',
@@ -211,9 +244,9 @@ with DAG(
         )
         
         mongo_sensor_task >> transform_mongo_data >> mongo_to_s3_task >> s3_sensor_task >> spark_task
-    
-    with TaskGroup(group_id='hdfs_hive_group') as second_pipeline:
 
+    # Group to make HDFS and Hive operations
+    with TaskGroup(group_id='hdfs_hive_group') as second_pipeline:
         check_hdfs_parquet_file = HdfsSensor(
             task_id='hdfs_parquet_sensor',
             filepath='/user/local-datalake/tmdb/movies/movies.parquet',
@@ -235,7 +268,6 @@ with DAG(
             trigger_rule=TriggerRule.ALL_FAILED,
             dag=dag
         )
-        
         
         check_hdfs_parquet_file >> hive_operations_task
 
