@@ -1,3 +1,7 @@
+// Scala script para leer JSON file de AWS (Minio) via Spark
+// Se transforman las columnas de fechas a timestamp propiamente
+// Se almacena el dataframe resultante en HDFS, en formato Parquet comprimido en snappy
+
 import org.apache.spark.sql.SparkSession
 
 val s3MinioAccessKey = System.getenv("MINIO_ROOT_USER")
