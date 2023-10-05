@@ -1,7 +1,13 @@
 #!/bin/bash
+"""
+Shell script para levantar el ETL environment:
+    1: Ubuntu setup
+    2: Docker services up (check that ports are unused)
+    3: Local Airflow setup 
 
 # to run: sudo sh airflow_and_docker_setup.sh
 # important: developed in ubuntu 22.04, must execute in super user mood
+"""
 
 # Verificar si el script se está ejecutando como root
 if [ "$EUID" -ne 0 ]
