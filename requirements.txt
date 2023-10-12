@@ -3,7 +3,8 @@ apache-airflow-providers-postgres
 apache-airflow-providers-amazon
 apache-airflow-providers-docker
 hdfs[avro,dataframe]
-apache-airflow-providers-apache-hdfs
+protobuf==3.20.1
+apache-airflow-providers-apache-hdfs==3.2.1
 pymongo
 apache-airflow-providers-mongo
 pandas
