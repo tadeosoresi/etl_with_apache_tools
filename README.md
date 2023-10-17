@@ -40,16 +40,16 @@ Este proyecto utiliza varias fuentes de datos para extraer información sobre pe
     modificar aquellos variables con valores a elección del desarrollador (esto no es obligatorio)
 3. Cargar dichas variables en la sesion de Ubuntu (puede ser WSL2) -> source environment_variables.sh
 4. OPCIONAL: Modificar archivo .env con valores a elección del dev
-5. Instalar paquetes necesarios para Airflow HDFS Provider -> sudo apt-get update && apt-get install krb5-config gcc gssapi libkrb5-dev
+5. Instalar paquetes necesarios para Airflow HDFS Provider -> sudo apt-get update && apt-get install krb5-config gcc libkrb5-dev
 6. Ejecutar en super user mood airflow_and_docker_setup.sh -> sudo sh airflow_and_docker_setup.sh
 7. Esperar que el ambiente se despliegue, se levanten los contenedores y se instale Airflow en el environment
 8. Activar environment: source airflow_env/bin/activate y desplegar Airflow:
     8.1. Primero, hacer un "echo $AIRFLOW_HOME", la salida por consola debe ser el directorio del repo.
     8.2. airflow db init
-    8.3. airflow users create --firstname xxxx --lastname xxx -role Admin --username xxx --password xxx --email xxx@xxx.com
+    8.3. airflow users create --firstname xxxx --lastname xxx --role Admin --username xxx --password xxx --email xxx@xxx.com
     8.4 airflow standalone (esto levantara el webserver en localhost puerto 8877, tambien el scheduler)
-9. Ir al Airflow Webserver (UI): Navegador -> locahost:8877
-10. Ejecutar DAG (Play), validar que las tasks corran sin excepciones:
+9.  Ir al Airflow Webserver (UI): Navegador -> locahost:8877
+10. Setear conexiones y descargar JAR's (al final del README), ejecutar DAG (Play) y validar que las tasks corran sin excepciones:
     10.1 Entrando al contenedor de MongoDB, validando la coleccion movies
     10.2 Visitando Minio en el navegador: localhost:9000 -> Ingresar usuario y clave contenidas en el archivo .env -> Validar JSON file     subido
     10.3 Validar datos en HIVE:
@@ -61,10 +61,45 @@ Este proyecto utiliza varias fuentes de datos para extraer información sobre pe
             10.3.6 SELECT * FROM movies;
 
 
-# JARS (wget)
-https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar
-https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.537/aws-java-sdk-bundle-1.12.537.jar
-https://repo1.maven.org/maven2/net/java/dev/jets3t/jets3t/0.9.4/jets3t-0.9.4.jar
-rm httplient-4.5.6.jar
-https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar
+## JARS ###
+Es necesario descargar ciertos JAR's para que Spark funcione correctamente, los siguientes jars se descargan en la carpeta
+/spark/jars/ del contenedor spark-master:
+wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar
+wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.537/aws-java-sdk-bundle-1.12.537.jar
+wget https://repo1.maven.org/maven2/net/java/dev/jets3t/jets3t/0.9.4/jets3t-0.9.4.jar
+rm httpclient-4.5.6.jar
+wget https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar
 
+## Conexiones de Airflow ###
+Para la ejecucion de distintos Operators/Sensors/Hooks en Airflow, es necesario que seteemos las siguientes conexiones
+desde la pestaña Admin -> Connections -> + (add connection):
+
+1. MongoDB del contenedor
+    Connection Id: mongo_etl_id
+    Type: MongoDB
+    Host: 127.0.0.1
+    Port: 27018
+
+2. AWS S3 (Minio)
+    Connection Id: aws_etl_id
+    Type: Amazon Web Services
+    AWS Access Key ID: variable MINIO_ROOT_USER del .env
+    AWS Secret Access Key ID: variable MINIO_ROOT_PASSWORD del .env
+    Extra: {"host": "http://127.0.0.1:9000"}
+
+3. HDFS
+    Connection Id: hdfs_conn_id
+    Type: HDFS
+    Host: 127.0.0.1
+    Login: root
+    Port: 9890
+
+4. Hive Metastore
+    Connection Id: hive_etl_id
+    Type: Hive Metastore Thrift
+    Host: 127.0.0.1
+    Login: hive
+    Password: hive
+    Port: 9083
+
+Una vez que seteemos esto, podremos ejecutar el DAG.
