@@ -7,7 +7,12 @@ protobuf==3.20.1
 apache-airflow-providers-apache-hdfs==3.2.1
 pymongo
 apache-airflow-providers-mongo
+apache-airflow-providers-common-sql
+hmsclient
 pandas
+pyhive[hive_pure_sasl]
+thrift
+apache-airflow-providers-apache-hive
 numpy
 phpserialize
 pymysql
