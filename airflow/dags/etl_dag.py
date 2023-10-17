@@ -249,7 +249,7 @@ with DAG(
         with TaskGroup(group_id='hdfs_hive_group') as second_pipeline:
             check_hdfs_parquet_file = HdfsSensor(
                 task_id='hdfs_parquet_sensor',
-                filepath='/user/local-datalake/tmdb/movies/movies.parquet',
+                filepath='/user/local-datalake/tmdb/movies.parquet',
                 hdfs_conn_id='hdfs_conn_id',
                 ignore_copying=True,
                 poke_interval=5,
@@ -265,7 +265,7 @@ with DAG(
                             'table': 'movies',
                             'hive_conn': 'hive_etl_id'
                         },
-                trigger_rule=TriggerRule.ALL_FAILED,
+                trigger_rule=TriggerRule.ALL_SUCCESS,
                 dag=dag
             )
             
