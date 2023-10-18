@@ -268,7 +268,13 @@ with DAG(
                 trigger_rule=TriggerRule.ALL_SUCCESS,
                 dag=dag
             )
+
+            pyspark_task = BashOperator(
+                task_id='pyspark_hive_to_hdfs',
+                bash_command='docker exec -it spark-master /spark/bin/spark-submit --driver-memory 8G /pysparkfiles/transform_hive_data.py',
+                dag=dag
+            )
             
-            check_hdfs_parquet_file >> hive_operations_task
+            check_hdfs_parquet_file >> hive_operations_task >> pyspark_task
 
         etl_setup >> api_tasks >> first_pipeline >> second_pipeline
