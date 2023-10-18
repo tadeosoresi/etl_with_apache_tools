@@ -82,6 +82,7 @@ services:
     container_name: spark-master
     volumes:
       - ./extraction/getMinioS3Data.scala:/scalafiles/getMinioS3Data.scala
+      - ./transform/transform_hive_data.py:/pysparkfiles/transform_hive_data.py
     depends_on:
       - namenode
       - datanode
