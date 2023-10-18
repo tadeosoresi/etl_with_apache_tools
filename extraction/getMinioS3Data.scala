@@ -27,7 +27,6 @@ val s3MinioBucket: String = "movies-datalake"
 val df = sqlContext.read.json("s3a://%s/movies.json".format(s3MinioBucket))
 val new_df = df.withColumn("created_at", col("created_at").getItem("$date")).withColumn("release_date", col("release_date").getItem("$date"))
 new_df.write.option("compression", "snappy").mode("overwrite").parquet("hdfs://172.103.0.17:9000/user/local-datalake/tmdb/movies.parquet")
-new_df.select("title", "original_language", "popularity", "vote_average").repartition(1).write.format("csv").mode("overwrite").option("sep", ",").option("header", "true").save("hdfs://172.103.0.17:9000/user/local-datalake/tmdb/movies_csv")
 
 val endTimeMillis = System.currentTimeMillis()
 val durationMilliSeconds = (endTimeMillis - startTimeMillis)
