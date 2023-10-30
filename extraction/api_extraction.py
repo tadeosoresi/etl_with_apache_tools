@@ -37,7 +37,7 @@ class TMDBApiData():
             print(f'Scraping page {page} of TMDB API')
             url = cls.movies_endpoint.format(page)
             response = cls.get_response(url, cls.headers)
-            if response.get('success', None) == False or page == 5: break
+            if response.get('success', None) == False or page == 25: break
             results = response.get('results')
             for content in results:
                 content_id = content['id']
