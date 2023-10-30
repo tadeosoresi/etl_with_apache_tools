@@ -83,6 +83,7 @@ services:
     volumes:
       - ./extraction/getMinioS3Data.scala:/scalafiles/getMinioS3Data.scala
       - ./transform/transform_hive_data.py:/pysparkfiles/transform_hive_data.py
+      - ./data/:/data/
     depends_on:
       - namenode
       - datanode
@@ -198,15 +199,21 @@ services:
     environment:
        - NEO4J_AUTH=neo4j/zeppelin
        - NEO4JLABS_PLUGINS=["apoc", "graph-data-science"]
+    volumes:
+       - ./data/:/var/lib/neo4j/import/
     networks:
       etl-network:
         ipv4_address: 172.103.0.13
   
   zeppelin:
     container_name: zeppelin
-    image: apache/zeppelin:0.9.0
+    image: apache/zeppelin:0.10.1
     ports:
        - 127.0.0.1:8888:8080
+    environment:
+       - ZEPPELIN_IMPERSONATE_CMD=impyla
+    volumes:
+      - ./zeppelin-data:/zeppelin/data
     networks:
       etl-network:
         ipv4_address: 172.103.0.14
