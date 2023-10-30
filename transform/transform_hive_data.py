@@ -1,4 +1,3 @@
-
 from pyspark.sql import SparkSession, HiveContext
 from pyspark.sql.functions import col, explode
 
@@ -21,12 +20,8 @@ df_exploded = df.select("id",
                      "original_language",
                      explode(col("cast")).alias("cast_exploded"))
 df_exploded = df_exploded.withColumn("actor", col("cast_exploded").getItem("original_name"))
-df_exploded = df_exploded.drop(col("cast_exploded")).dropDuplicates(['id', 'title', 'actor'])
-df_exploded \
-            .repartition(1) \
-            .write.format("csv") \
-            .mode("overwrite") \
-            .option("sep", ",") \
-            .option("header", "true") \
-            .save("hdfs://172.103.0.17:9000/user/local-datalake/tmdb/movies_neo_graph.csv")
+df_exploded = df_exploded.drop(col("cast_exploded")).dropDuplicates(['title', 'actor'])
+df_exploded.repartition(1) \
+        .write.format('com.databricks.spark.csv') \
+        .mode('overwrite').save('/data/movies_neo_graph', header=True)
 spark.stop()
