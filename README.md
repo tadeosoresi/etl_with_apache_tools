@@ -1,7 +1,7 @@
 # Complete ETL with apache tools
 
 ## Descripción
-Proyecto donde se simula un ETL con diversas tecnologias, con las cuales podemos extraer datos y llevar hacia otro distintos destinos.
+Proyecto donde se simula un ETL con diversas tecnologias, con las cuales podemos extraer datos de diversas fuentes y llevar a diversos destinos.
 La idea es "simular" a menor escala y sin un fin especifico, procesos y pipelines orquestados con Apache Airflow. 
 El flujo del ETL es el siguiente:
     - **Obtención de datos via API de TMDB (scrapper en Python)**
