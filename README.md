@@ -9,7 +9,7 @@ El flujo del ETL es el siguiente:
     - **Upload de los datos a AWS S3 (Minio)**
     - **Extracción de dichos datos desde el S3 a HDFS local via Spark**
     - **Creación y carga de los datos en el Data Warehouse (Hive)**
-    - **Creación de grafos via Neo4J, consumiendo datos de Hive**
+    - **Creación de grafos via Neo4J**
     
 Todo este proceso esta apoyado con multiples Sensors de Airflow, para crear los directorios en HDFS, Minio y también detectar cuando
 los datos estan disponibles en cierta fuente
