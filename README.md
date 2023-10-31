@@ -102,15 +102,17 @@ desde la pestaña Admin -> Connections -> + (add connection):
     Password: hive
     Port: 9083
 
-Una vez que seteemos esto, podremos ejecutar el DAG.
+### Una vez que seteemos esto, podremos ejecutar el DAG. ###
 Al finalizarlo deberemos ver una carpeta llamada ./data en la raiz del repositorio, en caso de no verla:
     1. sudo chmod 777 ./data/ para poder visualizarla ya que se comparte desde el contenedor de spark a host.
+
 En caso de que no este disponible, crear la carpeta manualmente:
     1. mkdir data
     2. sudo docker cp spark-master:/data/movies_neo_graph/ ./data/
     3. docker-compose up -d
+
 Nuestro csv ya estara disponible en la carpeta import del contenedor de Neo4j, ya podemos realizar grafos
     1. Ir a localhost:7474
     2. Conectar al servidor con el username neo4j y password zeppelin
     3. Ejecutar el codigo del archivo isualization/neo4j/movies_query.cypher
-    4. Experimentar nuevas queries 
+    4. Experimentar nuevas queries
