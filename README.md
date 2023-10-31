@@ -4,12 +4,13 @@
 Proyecto donde se simula un ETL con diversas tecnologias, con las cuales podemos extraer datos y llevar hacia otro distintos destinos.
 La idea es "simular" a menor escala y sin un fin especifico, procesos y pipelines orquestados con Apache Airflow. 
 El flujo del ETL es el siguiente:
-    Obtención de datos via API de TMDB (scrapper en Python)
-    Almacenamiento en MongoDB
-    Upload de los datos a AWS S3 (Minio)
-    Extracción de dichos datos desde el S3 a HDFS local via Spark
-    Creación y carga de los datos en el Data Warehouse (Hive)
-    Creación de grafos via Neo4J, consumiendo datos de Hive
+    - **Obtención de datos via API de TMDB (scrapper en Python)**
+    - **Almacenamiento en MongoDB**
+    - **Upload de los datos a AWS S3 (Minio)**
+    - **Extracción de dichos datos desde el S3 a HDFS local via Spark**
+    - **Creación y carga de los datos en el Data Warehouse (Hive)**
+    - **Creación de grafos via Neo4J, consumiendo datos de Hive**
+    
 Todo este proceso esta apoyado con multiples Sensors de Airflow, para crear los directorios en HDFS, Minio y también detectar cuando
 los datos estan disponibles en cierta fuente
 
