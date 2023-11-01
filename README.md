@@ -79,11 +79,12 @@ Este proyecto utiliza varias fuentes de datos para extraer información sobre pe
 ## JARS ###
 Es necesario descargar ciertos JAR's para que Spark funcione correctamente, los siguientes jars se descargan en la carpeta
 /spark/jars/ del contenedor spark-master:
-wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar
-wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.537/aws-java-sdk-bundle-1.12.537.jar
-wget https://repo1.maven.org/maven2/net/java/dev/jets3t/jets3t/0.9.4/jets3t-0.9.4.jar
-rm httpclient-4.5.6.jar
-wget https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar
+
+    wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar
+    wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.537/aws-java-sdk-bundle-1.12.537.jar
+    wget https://repo1.maven.org/maven2/net/java/dev/jets3t/jets3t/0.9.4/jets3t-0.9.4.jar
+    rm httpclient-4.5.6.jar
+    wget https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar
 
 ## Conexiones de Airflow ###
 Para la ejecucion de distintos Operators/Sensors/Hooks en Airflow, es necesario que seteemos las siguientes conexiones
