@@ -40,7 +40,7 @@ Este proyecto utiliza varias fuentes de datos para extraer información sobre pe
 2. Obtener dicho token y agregarlo a la variable TMDB_API_TOKEN en el archivo environment_variables.sh
     modificar aquellos variables con valores a elección del desarrollador (esto no es obligatorio)
 3. Cargar dichas variables en la sesion de Ubuntu (puede ser WSL2) -> source environment_variables.sh
-4. OPCIONAL: Modificar archivo .env con valores a elección del dev
+4. Modificar archivo .env con valores a elección del dev (opcional)
 5. Instalar paquetes necesarios para Airflow HDFS Provider -> sudo apt-get update && apt-get install krb5-config gcc libkrb5-dev
 6. Ejecutar en super user mood airflow_and_docker_setup.sh -> sudo sh airflow_and_docker_setup.sh
 7. Esperar que el ambiente se despliegue, se levanten los contenedores y se instale Airflow en el environment
