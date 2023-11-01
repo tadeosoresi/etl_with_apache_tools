@@ -45,20 +45,31 @@ Este proyecto utiliza varias fuentes de datos para extraer información sobre pe
 6. Ejecutar en super user mood airflow_and_docker_setup.sh -> sudo sh airflow_and_docker_setup.sh
 7. Esperar que el ambiente se despliegue, se levanten los contenedores y se instale Airflow en el environment
 8. Activar environment: source airflow_env/bin/activate y desplegar Airflow:
-    8.1. Primero, hacer un "echo $AIRFLOW_HOME", la salida por consola debe ser el directorio del repo.
-    8.2. airflow db init
-    8.3. airflow users create --firstname xxxx --lastname xxx --role Admin --username xxx --password xxx --email xxx@xxx.com
-    8.4 airflow standalone (esto levantara el webserver en localhost puerto 8877, tambien el scheduler)
+
+       8.1. Primero, hacer un "echo $AIRFLOW_HOME", la salida por consola debe ser el directorio del repo.
+
+       8.2. airflow db init
+
+       8.3. airflow users create --firstname xxxx --lastname xxx --role Admin --username xxx --password xxx --email xxx@xxx.com
+
+       8.4 airflow standalone (esto levantara el webserver en localhost puerto 8877, tambien el scheduler) 
+
 9.  Ir al Airflow Webserver (UI): Navegador -> locahost:8877
 10. Setear conexiones y descargar JAR's (al final del README), ejecutar DAG (Play) y validar que las tasks corran sin excepciones:
     10.1 Entrando al contenedor de MongoDB, validando la coleccion movies
     10.2 Visitando Minio en el navegador: localhost:9000 -> Ingresar usuario y clave contenidas en el archivo .env -> Validar JSON file     subido
     10.3 Validar datos en HIVE:
+
             10.3.1 docker exec -it hive-server bash
+
             10.3.2 hive
+
             10.3.3 SHOW DATABASES; (validar la db warehouse)
+
             10.3.4 USE warehouse;
+
             10.3.5 SHOW TABLES; (validar la tabla movies)
+
             10.3.6 SELECT * FROM movies;
 
 
