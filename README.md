@@ -90,42 +90,44 @@ Es necesario descargar ciertos JAR's para que Spark funcione correctamente, los 
 Para la ejecucion de distintos Operators/Sensors/Hooks en Airflow, es necesario que seteemos las siguientes conexiones
 desde la pestaña Admin -> Connections -> + (add connection):
 
-1. MongoDB del contenedor
-    Connection Id: mongo_etl_id
-    Type: MongoDB
-    Host: 127.0.0.1
-    Port: 27018
+1. **MongoDB del contenedor:**<br>
+        ConnectionId: mongo_etl_id<br>
+        Type: MongoDB<br>
+        Host: 127.0.0.1<br>
+        Port: 27018
 
-2. AWS S3 (Minio)
-    Connection Id: aws_etl_id
-    Type: Amazon Web Services
-    AWS Access Key ID: variable MINIO_ROOT_USER del .env
-    AWS Secret Access Key ID: variable MINIO_ROOT_PASSWORD del .env
-    Extra: {"host": "http://127.0.0.1:9000"}
+2. **AWS S3 (Minio):**<br>
+        ConnectionId: aws_etl_id<br>
+        Type: Amazon Web Services<br>
+        AWS Access Key ID: variable MINIO_ROOT_USER del .env<br>
+        AWS Secret Access Key ID: variable MINIO_ROOT_PASSWORD del .env<br>
+        Extra: {"host": "http://127.0.0.1:9000"}
 
-3. HDFS
-    Connection Id: hdfs_conn_id
-    Type: HDFS
-    Host: 127.0.0.1
-    Login: root
-    Port: 9890
+3. **HDFS:**<br>
+        ConnectionId: hdfs_conn_id<br>
+        Type: HDFS<br>
+        Host: 127.0.0.1<br>
+        Login: root<br>
+        Port: 9890
 
-4. Hive Metastore
-    Connection Id: hive_etl_id
-    Type: Hive Metastore Thrift
-    Host: 127.0.0.1
-    Login: hive
-    Password: hive
-    Port: 9083
+4. **Hive Metastore:**<br>
+        ConnectionId: hive_etl_id<br>
+        Type: Hive Metastore Thrift<br>
+        Host: 127.0.0.1<br>
+        Login: hive<br>
+        Password: hive<br>
+        Port: 9083
 
 ### Una vez que seteemos esto, podremos ejecutar el DAG. ###
 Al finalizarlo deberemos ver una carpeta llamada ./data en la raiz del repositorio, en caso de no verla:
-    1. sudo chmod 777 ./data/ para poder visualizarla ya que se comparte desde el contenedor de spark a host.
+    
+    sudo chmod 777 ./data/ para poder visualizarla ya que se comparte desde el contenedor de spark a host.
 
 En caso de que no este disponible, crear la carpeta manualmente:
-    1. mkdir data
-    2. sudo docker cp spark-master:/data/movies_neo_graph/ ./data/
-    3. docker-compose up -d
+
+    mkdir data
+    sudo docker cp spark-master:/data/movies_neo_graph/ ./data/
+    docker-compose up -d
 
 Nuestro csv ya estara disponible en la carpeta import del contenedor de Neo4j, ya podemos realizar grafos
     1. Ir a localhost:7474
