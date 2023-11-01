@@ -129,8 +129,8 @@ En caso de que no este disponible, crear la carpeta manualmente:
     sudo docker cp spark-master:/data/movies_neo_graph/ ./data/
     docker-compose up -d
 
-Nuestro csv ya estara disponible en la carpeta import del contenedor de Neo4j, ya podemos realizar grafos
-    1. Ir a localhost:7474
-    2. Conectar al servidor con el username neo4j y password zeppelin
-    3. Ejecutar el codigo del archivo isualization/neo4j/movies_query.cypher
+Nuestro csv ya estara disponible en la carpeta import del contenedor de Neo4j, ya podremos realizar grafos:<br>
+    1. Ir a localhost:7474<br>
+    2. Conectar al servidor con el username neo4j y password zeppelin<br>
+    3. Ejecutar el codigo del archivo isualization/neo4j/movies_query.cypher<br>
     4. Experimentar nuevas queries
