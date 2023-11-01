@@ -54,10 +54,13 @@ Este proyecto utiliza varias fuentes de datos para extraer información sobre pe
 
        8.4 airflow standalone (esto levantara el webserver en localhost puerto 8877, tambien el scheduler) 
 
-9.  Ir al Airflow Webserver (UI): Navegador -> locahost:8877
+9.  Ir al Airflow Webserver (UI): ingresar al navegador -> locahost:8877
 10. Setear conexiones y descargar JAR's (al final del README), ejecutar DAG (Play) y validar que las tasks corran sin excepciones:
+    
     10.1 Entrando al contenedor de MongoDB, validando la coleccion movies
-    10.2 Visitando Minio en el navegador: localhost:9000 -> Ingresar usuario y clave contenidas en el archivo .env -> Validar JSON file     subido
+
+    10.2 Visitando Minio en el navegador: localhost:9000 -> Ingresar usuario y clave contenidas en el archivo .env -> Validar JSON file subido
+    
     10.3 Validar datos en HIVE:
 
             10.3.1 docker exec -it hive-server bash
